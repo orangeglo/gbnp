@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>GBNP - Game Boy Nintendo Power ROM Builder</title>
+    <script src="script/vue.js"></script>
+    <script src="script/gbnp.js"></script>
+  </head>
+
+  <body>
+    <h1>GBNP - Game Boy Nintendo Power ROM Builder</h1>
+
+    <div id="app">
+      <div>
+        <label for="fileInput">Add a GB/GBC Rom</label>
+        <input id="fileInput" type="file" v-on:change="addFile">
+      </div>
+
+      <div>
+        Total ROM Used: {{ processor.romUsedKB() }}
+      </div>
+
+      <div>
+        <ol>
+          <li v-for="rom in roms">
+            <p>{{ rom.title }}</p>
+            <p>{{ rom.type }}</p>
+            <p>{{ rom.cgb ? 'CGB' : 'DMG'}}</p>
+            <p>{{ rom.romSizeKB() }}</p>
+            <p>{{ rom.ramSizeKB() }}</p>
+          </li>
+        </ol>
+      </div>
+
+      <div>
+        <input type="button" value="Download ROM">
+      </div>
+    </div>
+
+    <script src="script/app.js"></script>
+  </body>
+</html>
