@@ -20,7 +20,6 @@
       </div>
       <div>
         Data: {{ processor.mapData() }}
-
       </div>
 
       <div>
@@ -36,7 +35,7 @@
       </div>
 
       <div>
-        <input type="button" value="Download ROM">
+        <a id="mapLink" download="output.map" v-bind:href="mapData" type="application/octet-stream" v-on:click="downloadMapFile">Download MAP File</a>
       </div>
     </div>
 
