@@ -1,0 +1,101 @@
+from http://forums.nesdev.com/viewtopic.php?f=12&t=11453&start=135#p161062
+
+
+
+GB Mapping Info
+Entries start at 0x0 divided into 3 Byte segments
+
+For example, let's look at the start of the mapping for a multi-game cart:  
+A8 00 00 71 04 00 48 94 04 separates into
+A8 00 00 MENU
+71 04 00 GAME 1
+48 94 04 GAME 2
+
+Byte 00 of each entry contains the MBC Type, ROM Size, and SRAM Size (start).  
+SRAM Size is 3 bits across Byte 00 and Byte 01.
+     MBC SZE SRAM 
+A8 = 101 010 00  0 MBC5, size 2 = 128KB
+71 = 011 100 01  0 MBC3, size 4 = 512KB, SRAM 8KB
+48 = 010 010 00  1 MBC2, size 2 = 128KB, SRAM MBC2
+
+Byte 00: 1st 3 Bits = MBC Type
+        000 = MBC0
+        001 = MBC1
+        010 = MBC2
+        011 = MBC3
+        101 = MBC5
+ 
+Byte 00: 2nd 3 Bits = ROM Size (minimum size is 128KB due to block size)
+        010 = Size 2 - 128KB
+        011 = Size 3 - 256KB
+        100 = Size 4 - 512KB
+        101 = Size 5 - 1MB
+
+Byte 00: Last 2 Bits (bit1..bit0) + Byte 01: 1st Bit (bit7) = SRAM Size
+        00 0 = NONE
+        00 1 = SRAM MBC2
+        01 0 = SRAM 8KB
+        01 1 = SRAM 32KB
+
+Byte 01 contains the SRAM Size (end) and ROM Block in the Flash.
+ROM Blocks are 128KB (8 total)
+Byte 01: Last 7 Bits (bit6..bit0) = ROM Block
+      00 = ROM Block 0  start offset 0KB
+      04 = ROM Block 1  start offset 128KB
+      08 = ROM Block 2  start offset 256KB
+      0C = ROM Block 3  start offset 384KB
+      10 = ROM Block 4  start offset 512KB
+      14 = ROM Block 5  start offset 640KB
+      18 = ROM Block 6  start offset 768KB
+      1C = ROM Block 7  start offset 896KB
+
+Byte 02 contains the RAM Block in the SRAM.
+RAM Blocks are 8KB (16 total)
+Byte 02: RAM Block:
+      00 = RAM Block 0  start offset 0KB
+      04 = RAM Block 1  start offset 8KB
+      08 = RAM Block 2  start offset 16KB
+      0C = RAM Block 3  start offset 24KB     
+      and so on until RAM Block 15.
+
+Going back to our example cart:
+A8 00 00 MENU:  MBC5, size 2 = 128KB, ROM Block 0, RAM Block 0 (Ignored since SRAM is 000)
+71 04 00 GAME 1:  MBC3, size 4 = 512KB, SRAM 8KB, ROM Block 1, RAM Block 0
+48 94 04 GAME 2:  MBC2, size 2 = 128KB, SRAM MBC2, ROM Block 5, RAM Block 1
+
+
+
+Nintendo Power Directory for Gameboy version
+Located at ROM offset 1C000h (aka 7:4000h in gameboy memory).
+Entries are 200h bytes in size, the GUI supports max 8 entries at 7:4000h..7:4FFFh.
+The first entry is a dummy entry for the menu, the other entries are for game(s), unused entries are FFh-filled.
+The format is almost exactly same as in SNES version (but using only 200h bytes per entry, using a smaller bitmap, and without the SNES's weird overlapping bitmap tiles, and with different granularity for the ROM/SRAM values).
+
+  000h 1    Index (00h..07h) (or FFh=Unused) (or initially 07h for menu)
+  001h 1    ROM base in 128K units
+  002h 1    maybe SRAM base? in ???-units
+  003h 2    ROM size in 128Kbyte units (0001h..0007h = 128K..896K)
+  005h 2    SRAM size in 32-byte units (0000h,00xxh,01xxh,xxxxh=0,MBC2,8K,32K)
+  007h 12   Title ASCII "DMP -xxxx-  "
+  013h 44   Title SHIFT-JIS
+  03Fh 100h Title Bitmap (128x8 pixels, 16 tiles at 2bpp)
+  13Fh 80h  Zerofilled
+  1BFh 10   Date ASCII "MM/DD/YYYY"
+  1C9h 8    Time ASCII "HH:MM:SS"
+  1D1h 8    LAW ASCII  "LAWnnnnn"
+  1D9h ..   Unused (FFh-filled)
+  1F0h 16   Unused (FFh-filled)(game entries) or "MULTICARTRIDGE 8"(menu entry)
+bitmap palette:
+  DMG/SGB: (0=white, 1=light gray, 2=dark gray, 3=black)
+  CGB/GBA: (0=white, 1=dark red, 2=dark magenta, 3=black)
+
+For the SRAM sizes, the "xx" means that the GUI ignores those 8bit fragments. And no matter of what values that bits have, it does support only four different SRAM sizes: 0, "MBC2", 8K, 32K. Anyways, the "xx" should be probably set to some specific values - skaman, did you check which games use which SRAM size settings in the directory?
+
+News Ticker
+Aside from the directory, the programming stations are also updating data at bank 6:4000h (ROM offset 18000h). Which contains the scrolling text that is shown at the bottom of the menu. There are at least two variants, one found in blank carts (with only the menu installed), and one other variant found in my cart with Puyo Puyo 2 installed.
+Don't know how often that text has been updated. Skaman, if you compare the ROM offsets at 18000h..1BFFFFh from your cartridge collection, are there lots of different variants?
+
+Selftest Function
+The Menu contains some selftest function which seems to be activated when pressing all four buttons plus all four DPAD directions (which normally isn't mechanically possible). The test is barely testing the MENU's memory mapping, not testing the mapping or checksums of the other installed games. And, the test is working ONLY on blank carts, for two reasons:
+The checksum in cart header isn't adjusted for changed data at 6:4000h (news ticker) or 7:4000h (directory).
+The bank test expects 7:4000h to contain 07h (whilst non-empty carts are storing the menu index (00h) in that location).

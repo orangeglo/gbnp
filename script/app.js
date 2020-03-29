@@ -3,7 +3,8 @@ let app = new Vue({
   data: {
     roms: [],
     processor: new Processor([]),
-    mapData: ''
+    mapData: '',
+    romData: ''
   },
   methods: {
     addFile: async function(e) {
@@ -15,6 +16,10 @@ let app = new Vue({
     downloadMapFile: function(e) {
       if (this.mapData) { URL.revokeObjectURL(this.mapData) }
       this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
-    }
+    },
+    downloadRomFile: function(e) {
+      if (this.romData) { URL.revokeObjectURL(this.romData) }
+      this.romData = URL.createObjectURL(new Blob([this.processor.romData()]));
+    }   
   }
 });
