@@ -12,6 +12,7 @@ let app = new Vue({
         )
       );
 
+      console.log(this.roms)
       this.processor.roms = this.roms;
 
       e.target.value = '';

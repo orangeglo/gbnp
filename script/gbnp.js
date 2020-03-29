@@ -7,6 +7,8 @@ const CARTRIDGE_TYPES = [
   'MBC5', 'MBC5+RAM', 'MBC5+RAM+BATTERY', 'MBC5+RUMBLE', 'MBC5+RUMBLE+RAM', 'MBC5+RUMBLE+RAM+BATTERY'
 ]
 
+const FINAL_BYTES = [0x02, 0x00, 0x30, 0x12, 0x99, 0x11, 0x12, 0x20, 0x37, 0x57, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00]
+
 class ROM {
   constructor(arrayBuffer) {
     this._arrayBuffer = arrayBuffer;
@@ -65,12 +67,77 @@ class Processor {
   }
 
   mapData() {
-    if (this._mapData) {
+    const mapBuffer = new ArrayBuffer(128);
+    let map = new FileSeeker(mapBuffer);
 
-    } else {
-      let mapBuffer = ArrayBuffer(128);
-      let map = new DataView(mapBuffer);
+    // write mbc type, rom size, and ram size for menu
+    map.writeBytes([0xA8, 0, 0]);
+
+    // write mbc type, rom size, and ram size for each rom
+    let romOffset = 128;
+    let ramOffset = 0;
+
+    for (let i = 0; i < this.roms.length; i++) {
+      let rom = this.roms[i];
+      let bits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // 16
+
+      // set mbc bits
+      let tb = rom.type_byte
+      if (tb >= 0x01 || tb <= 0x30) {
+        bits[15] = 0; bits[14] = 0; bits[13] = 1;
+      } else if (tb >= 0x05 || tb <= 0x06) {
+        bits[15] = 0; bits[14] = 1; bits[13] = 0;
+      } else if (tb >= 0xF || tb <= 0x13 ) {
+        bits[15] = 0; bits[14] = 1; bits[13] = 1;
+      } else if (tb >= 0x19 || tb <= 0x1E ) {
+        bits[15] = 1; bits[14] = 0; bits[13] = 0;
+      }
+
+      // set rom bits
+      let rs = rom.paddedRomSizeKB();
+      if (rs == 64) { // 010
+        bits[12] = 0; bits[11] = 1; bits[10] = 0;
+      } else if (rs == 128) { // 010
+        bits[12] = 0; bits[11] = 1; bits[10] = 0;
+      } else if (rs == 256) { // 011
+        bits[12] = 0; bits[11] = 1; bits[10] = 1;
+      } else if (rs == 512) { // 100
+        bits[12] = 1; bits[11] = 0; bits[10] = 0;
+      } else { // 101
+        bits[12] = 1; bits[11] = 0; bits[10] = 1;
+      }
+
+      // set ram bits
+      if (rom.typeByte == 0x06) { // MBC2+BATTERY 001
+        bits[9] = 0; bits[8] = 0; bits[7] = 1;
+      } else if (rom.ramSizeKB == 0) { // No RAM 000
+        bits[9] = 0; bits[8] = 0; bits[7] = 0;
+      } else if (rom.ramSizeKB == 8) { // 8KB 010
+        bits[9] = 0; bits[8] = 1; bits[7] = 0;
+      } else if (rom.ramSizeKB >= 32) { // 32KB+ 011
+        bits[9] = 0; bits[8] = 1; bits[7] = 1;
+      } else { // < 8KB 010
+        bits[9] = 0; bits[8] = 1; bits[7] = 0;
+      }
+
+      // rom offset and cart info bits
+      bits.reverse();
+      let bytes = [parseInt(bits.slice(0, 8), 2), parseInt(bits.slice(8, 16), 2)]
+      bytes[1] = bytes[1] | Math.trunc(romOffset / 32);
+      console.log(bytes)
+      map.writeBytes(bytes)
+      romOffset += rom.paddedRomSizeKB();
+
+      // ram offset
+      map.writeByte(Math.trunc(ramOffset / 2));
+      ramOffset += (rom.typeByte == 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
     }
+
+    // trailer
+    map.writeByteUntil(0xFF, 127 - FINAL_BYTES.length);
+    map.writeBytes(FINAL_BYTES);
+
+    return new Uint8Array(mapBuffer);
   }
 }
 
@@ -103,13 +170,20 @@ class FileSeeker {
   }
 
   writeByte(byte) {
-    this.view.setUint8(byte);
+    console.log(byte)
+    this.view.setUint8(this.position, byte);
     this.position++;
   }
 
   writeBytes(bytes) {
     for (const byte in bytes) {
       this.writeByte(byte);
+    }
+  }
+
+  writeByteUntil(byte, stop) {
+    while (this.position < stop) {
+      this.writeByte(byte)
     }
   }
 }
