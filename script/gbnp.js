@@ -63,8 +63,6 @@ class Processor {
   }
 
   ramUsedKB() {
-    // is this quite right for MBC2?
-
     return this.roms.reduce((total, rom) => {
       return total += rom.ramSizeKB();
     }, 0);
