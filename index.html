@@ -4,39 +4,86 @@
     <title>GBNP - Game Boy Nintendo Power ROM Builder</title>
     <script src="script/vue.js"></script>
     <script src="script/gbnp.js"></script>
+
+    <style>
+      a.download-link {
+        color: blue;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 5px;
+      }
+
+      thead tr {
+        border-bottom: 1px solid #ddd;
+      }
+
+      tfoot tr {
+        border-top: 1px solid #ddd;
+      }
+
+      tbody tr:nth-child(odd) {
+        background-color: #f2f2f2;
+      }
+    </style>
   </head>
 
   <body>
     <h1>GBNP - Game Boy Nintendo Power ROM Builder</h1>
-
     <div id="app">
       <div>
-        <label for="fileInput">Add a GB/GBC Rom</label>
-        <input id="fileInput" type="file" v-on:change="addFile">
+        <table>
+          <thead>
+            <tr>
+              <th>Index</th>
+              <th>Title</th>
+              <th>Type</th>
+              <th>ROM (KB)</th>
+              <th>RAM (KB)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(rom, index) in roms">
+              <td>{{ index + 1 }}</td>
+              <td>{{ rom.title }}</td>
+              <td>{{ rom.type }}</td>
+              <td>{{ rom.padded() ? '128 (' + rom.romSizeKB() + ')' : rom.romSizeKB() }}</td>
+              <td>{{ rom.ramSizeKB() }}</td>
+              <td>
+                <input v-bind:disabled="index == 0" v-on:click="moveUp(index)" type="button" value="↑"/>
+                <input v-bind:disabled="index == (roms.length - 1)" v-on:click="moveDown(index)" type="button" value="↓"/>
+                <input v-on:click="removeFile(index)" type="button" value="x"/>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>{{ processor.romUsedKB() }}</td>
+              <td>{{ processor.ramUsedKB() }}</td>
+              <td>
+                <button type="button"><label for="fileInput">Add ROM</label></button>
+                <input style="display: none" id="fileInput" type="file" v-on:change="addFile">
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
 
-      <div>
-        Total ROM Used: {{ processor.romUsedKB() }}
-      </div>
 
-      <div>
-        <ol>
-          <li v-for="rom in roms">
-            <p>{{ rom.title }}</p>
-            <p>{{ rom.type }}</p>
-            <p>{{ rom.cgb ? 'CGB' : 'DMG'}}</p>
-            <p>{{ rom.romSizeKB() }}</p>
-            <p>{{ rom.ramSizeKB() }}</p>
-          </li>
-        </ol>
-      </div>
-
-      <div>
-        <a download="output.map" v-bind:href="mapData" type="application/octet-stream" v-on:click="downloadMapFile">Download MAP File</a>
-      </div>
-      <div>
-        <a download="output.gb" v-bind:href="romData" type="application/octet-stream" v-on:click="downloadRomFile">Download ROM File</a>
-      </div>
+      <p>
+        <a class='download-link' v-bind:download="filename + '.map'" v-bind:href="mapData" type="application/octet-stream" v-on:click="downloadMapFile">Download MAP File</a>
+        /
+        <a class='download-link' v-bind:download="filename + '.gb'" v-bind:href="romData" type="application/octet-stream" v-on:click="downloadRomFile">Download ROM File</a>
+      </p>
     </div>
 
     <script src="script/app.js"></script>
