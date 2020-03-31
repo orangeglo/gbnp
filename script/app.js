@@ -1,15 +1,28 @@
+/*
+  TODO:
+  - Implement bitmap writing
+  - implement basic menu validation
+  - implement basic rom validation
+*/
+
 let app = new Vue({
   el: '#app',
   data: {
     menu: new Menu(),
     roms: [],
     processor: new Processor([]),
-    filename: 'output',
+    filename: 'GBNP',
     mapData: '',
     romData: ''
   },
   created: function() {
     this.processor.menu = this.menu;
+  },
+  computed: {
+    downloadEnabled: function() {
+      return (this.roms.length > 0) && this.menu.present() && this.menu.valid() && !this.romOverflow;
+    },
+    romOverflow: function() { return this.processor.romOverflow(); }
   },
   methods: {
     addMenu: function(e) {
@@ -52,8 +65,27 @@ let app = new Vue({
       if (this.romData) { URL.revokeObjectURL(this.romData) }
       this.romData = URL.createObjectURL(new Blob([this.processor.romData()]));
     },
-    downloadEnabled: function() {
-      return (this.roms.length > 0) && this.menu.present() && this.menu.valid() ;
-    }
+    updateMenuText: function(rom, val) {
+      if (rom.bitmapTimeoutHandle) { clearTimeout(rom.bitmapTimeoutHandle); }
+      rom.bitmapTimeoutHandle = setTimeout(function() {
+        rom.updateMenuText(val);
+      }, 500);
+    },
+    stopPropagation: function(e) { e.stopImmediatePropagation(); },
+    triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
+    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); }
   }
+});
+
+Vue.component('bitmap-preview', {
+  props: ['data'],
+  mounted: function() {
+    let canvas = this.$refs.canvas;
+    const ctx = canvas.getContext('2d');
+    ctx.putImageData(new ImageData(this.data, 96, 8), 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.scale(2, 2);
+    ctx.drawImage(ctx.canvas, 0, 0);
+  },
+  template: '<canvas width="192" height="16" ref="canvas"></canvas>'
 });

@@ -4,6 +4,7 @@
     <title>Game Boy Nintendo Power ROM Builder</title>
     <script src="script/vue.js"></script>
     <script src="script/gbnp.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
 
@@ -13,7 +14,11 @@
       This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>. The cartridge can store up to seven roms, or a total of 896KB of game data. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
     </div>
     <div id="app">
-      <h2>1. Upload Menu ROM <span v-if="menu.ready()" style="color: green">✓</span><span v-if="!menu.ready()" style="color: red">✗</span></h2>
+      <h2>
+        1. Upload Menu ROM
+        <span v-if="menu.ready()" style="color: green">✓</span>
+        <span v-if="!menu.ready()" style="color: red">✗</span>
+      </h2>
       <section>
         <p v-if="!menu.present()">
           Menu is not loaded. Please upload a menu ROM.
@@ -27,11 +32,17 @@
         <p v-if="!menu.loadedFromStorage && menu.ready()">
           Menu loaded and cached! You're all set.
         </p>
-        <button class="upload" type="button"><label for="menuFileInput">Upload Menu</label></button>
+        <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
+          <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Upload Menu</label>
+        </button>
         <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
       </section>
 
-      <h2>2. Add Game ROMs <span v-if="roms.length > 0" style="color: green">✓</span></h2>
+      <h2>
+        2. Add Game ROMs
+        <span v-if="roms.length > 0 && !romOverflow" style="color: green">✓</span>
+        <span v-if="romOverflow"style="color: red">✗</span>
+      </h2>
       <section>
         <table>
           <thead>
@@ -46,31 +57,35 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(rom, index) in roms">
+            <tr v-for="(rom, index) in roms" v-bind:key="index">
               <td>
                 <button id="remove-rom" v-on:click="removeROM(index)" type="button">✗</button>
-                <button v-bind:disabled="index == 0" v-on:click="moveUp(index)" type="button">↑</button>
-                <button v-bind:disabled="index == (roms.length - 1)" v-on:click="moveDown(index)" type="button">↓</button>
+                <button :disabled="index == 0" v-on:click="moveUp(index)" type="button">↑</button>
+                <button :disabled="index == (roms.length - 1)" v-on:click="moveDown(index)" type="button">↓</button>
               </td>
               <td>{{ rom.title }}</td>
               <td>{{ rom.type }}</td>
               <td>{{ rom.padded() ? '128 (' + rom.romSizeKB() + ')' : rom.romSizeKB() }}</td>
               <td>{{ rom.ramSizeKB() }}</td>
               <td>
-                <input type="text" class='menu-text' v-bind:value="rom.menuText"/>
+                <input type="text" class='menu-text' :value="rom.menuText" @input="e => updateMenuText(rom, e.target.value)"/>
               </td>
-              <td></td>
+              <td>
+                <bitmap-preview :data="rom.bitmapPreviewBuffer"/>
+              </td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td>
-                <button class="upload" v-bind:disabled="!menu.ready()" type="button"><label for="romFileInput">Add Game</label></button>
-                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" v-bind:disabled="!menu.ready()" accept=".gb,.gbc">
+                <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.ready() || romOverflow" type="button">
+                  <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Game</label>
+                </button>
+                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.ready() || romOverflow" accept=".gb,.gbc">
               </td>
               <td></td>
               <td></td>
-              <td>{{ processor.romUsedKB() }}</td>
+              <td :class="{ overflow: romOverflow }">{{ processor.romUsedKB() }}</td>
               <td>{{ processor.ramUsedKB() }}</td>
               <td></td>
               <td></td>
@@ -81,9 +96,13 @@
 
       <h2>3. Download Files</h2>
       <section>
-        <a class='download-link' v-bind:download="filename + '.map'" v-bind:href="downloadEnabled() ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" v-bind:class="{ disabled: !downloadEnabled() }">Download MAP File</a>
+        <div>
+          <label id="filename-label" for="filename-input">Filename: </label><input id="filename-input" type="text" :value="filename"/>
+        </div>
+        <br/>
+        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
         /
-        <a class='download-link' v-bind:download="filename + '.gb'" v-bind:href="downloadEnabled() ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" v-bind:class="{ disabled: !downloadEnabled() }">Download ROM File</a>
+        <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
       </section>
     </div>
 

@@ -38,13 +38,18 @@ footer {
 }
 
 button {
-  padding: 2px 5px;
+  padding: 2px 3px;
+  padding-bottom: 3px;
   font-weight: bold;
 }
 
 button.upload {
-  padding: 2px 8px;
+  padding: 3px 0;
   color: blue;
+}
+
+button label {
+  padding: 5px 8px;
 }
 
 button#remove-rom {
@@ -86,6 +91,15 @@ table {
 th, td {
   text-align: left;
   padding: 5px;
+}
+
+td.overflow {
+  background-color: red;
+}
+
+#filename-label {
+  font-weight: bold;
+  margin-right: 20px;
 }
 
 thead tr {

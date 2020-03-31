@@ -7,6 +7,12 @@ const CARTRIDGE_TYPES = [
   'MBC5', 'MBC5+RAM', 'MBC5+RAM+BATTERY', 'MBC5+RUMBLE', 'MBC5+RUMBLE+RAM', 'MBC5+RUMBLE+RAM+BATTERY'
 ];
 const MAP_TRAILER_BYTES = [0x02, 0x00, 0x30, 0x12, 0x99, 0x11, 0x12, 0x20, 0x37, 0x57, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00];
+const BITMAP_PREVIEW_BYTES = [
+  [0xFF, 0xFF, 0xFF, 0xFF], // white
+  [0xBB, 0xBB, 0xBB, 0xFF], // light grey
+  [0x66, 0x66, 0x66, 0xFF], // dark grey
+  [0x00, 0x00, 0x00, 0xFF] // black
+]
 
 class Menu {
   constructor() {
@@ -61,7 +67,11 @@ class ROM {
     let paddedFile = new FileSeeker(this.arrayBuffer);
     paddedFile.writeBytes(file.read(file.size()));
 
-    // add error for rom too big, ram over 32KB, unknown type
+    this.updateBitmap();
+
+    // add error for "invalid" rom (IE not a gb rom file)
+    if (!this.type) { alert('Cartridge type could not be determined!') }
+    if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!') }
   }
 
   romSizeKB() {
@@ -78,6 +88,70 @@ class ROM {
 
   ramSizeKB() {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
+  }
+
+  updateMenuText(text) {
+    this.menuText = text;
+    this.updateBitmap();
+  }
+
+  updateBitmap() {
+    let buffer = [];
+
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0x00);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0b01010101);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0b10101010);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0xFF);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0x00);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0b01010101);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0b10101010);
+    }
+    for (let byte = 0; byte < 24; byte++){
+      buffer.push(0xFF);
+    }
+
+    for (let byte = 0; byte < 24; byte++){
+      for (let i = 0; i < 8; i++) {
+        buffer[byte+i*24] = buffer[byte+i*24] | 0b11000000;
+      }
+      console.log("g")
+    }
+
+    this.bitmapBuffer = new Uint8Array(buffer);
+    this.updateBitmapPreview(buffer);
+  }
+
+  updateBitmapPreview(buffer) {
+    let previewBuffer = []
+
+    for (let i = 0; i < buffer.length; i++) {
+      const byte = buffer[i];
+      let bits = [
+        (byte & 0b11000000) >> 6,
+        (byte & 0b00110000) >> 4,
+        (byte & 0b00001100) >> 2,
+        (byte & 0b00000011)
+      ]
+      for (let j = 0; j < bits.length; j++){
+        let rgba = BITMAP_PREVIEW_BYTES[bits[j]];
+        previewBuffer.push(...rgba);
+      }
+    }
+
+    this.bitmapPreviewBuffer = new Uint8ClampedArray(previewBuffer);
   }
 }
 
@@ -97,6 +171,10 @@ class Processor {
     return this.roms.reduce((total, rom) => {
       return total += rom.ramSizeKB();
     }, 0);
+  }
+
+  romOverflow() {
+    return (this.romUsedKB() > 896);
   }
 
   mapData() {
@@ -213,7 +291,8 @@ class Processor {
       romFile.seek(romFileIndex + 63);
 
       // title bitmap
-      romFile.writeByteUntil(0xFF, romFileIndex + 63 + 192); // solid black
+      // romFile.writeByteUntil(0xFF, romFileIndex + 63 + 192); // solid black
+      romFile.writeBytes(rom.bitmapBuffer);
 
       romFileIndex += 512
     }
