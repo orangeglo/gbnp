@@ -3,13 +3,47 @@ html {
   line-height: 1.4;
 }
 
+@font-face {
+  font-family: "GillSans-HeavyItalic";
+  src: url("./GillSansHeavyItalic.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1 {
+  color: #000079;
+}
+
+h1, h2 {
+  font-family: 'GillSans-HeavyItalic', sans-serif;
+  padding-top: 10px;
+}
+
+h2 {
+  color: #444;
+  border-top: 2px dotted grey;
+  display: inline-block;
+  border-bottom: 2px dotted grey;
+}
+
+p {
+  margin-top: 0;
+}
+
+footer {
+  margin-top: 40px;
+  font-size: 0.75em;
+  font-weight: bold;
+  color: #444;
+}
+
 button {
-  padding: 1px;
+  padding: 2px 5px;
   font-weight: bold;
 }
 
-button#add-rom {
-  padding: 1px 9px;
+button.upload {
+  padding: 2px 8px;
   color: blue;
 }
 
@@ -17,8 +51,31 @@ button#remove-rom {
   color: red;
 }
 
-a.download-link {
+button[disabled='disabled'] {
+  color: grey;
+}
+
+.text-container {
+  width: 850px;
+}
+
+a {
+  color: #000079;
+}
+
+a.download-link{
   color: blue;
+}
+
+a.disabled {
+  pointer-events: none;
+  cursor: default;
+  text-decoration: none;
+  color: grey;
+}
+
+section {
+  margin-left: 10px;
 }
 
 table {
