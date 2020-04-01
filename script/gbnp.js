@@ -98,39 +98,47 @@ class ROM {
   updateBitmap() {
     let buffer = [];
 
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0x00);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0b01010101);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0b10101010);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0xFF);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0x00);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0b01010101);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0b10101010);
-    }
-    for (let byte = 0; byte < 24; byte++){
-      buffer.push(0xFF);
-    }
+    const canvas = document.createElement("canvas");
+    canvas.height = 8;
+    canvas.width = 96;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 96, 8);
+    ctx.font = '8px Early-Gameboy'
+    ctx.fillStyle = '#777';
+    ctx.fillText(this.menuText,1,7);
+    const imageData = ctx.getImageData(0, 0, 96, 8).data;
 
-    for (let byte = 0; byte < 24; byte++){
-      for (let i = 0; i < 8; i++) {
-        buffer[byte+i*24] = buffer[byte+i*24] | 0b11000000;
+    for (let i = 0; i < imageData.length; i+=16){
+      let byte = 0;
+      for (let j = 0; j < 4; j++) {
+        let red = imageData[i+j*4];
+        if (red < 127) {
+          byte = byte | 0b11 << (6 - j*2);
+        }
       }
-      console.log("g")
+      buffer.push(byte)
     }
 
-    this.bitmapBuffer = new Uint8Array(buffer);
+    let outputBuffer = []
+    for (let h = 0; h < 24; h+=2) {
+      for (let i = h; i < 192; i+=24) {
+        let a = buffer[i]
+        let b = buffer[i+1]
+
+        let outputA =
+          (a & 0b10000000) | ((a & 0b00100000) << 1) | ((a & 0b00001000) << 2) | ((a & 0b00000010) << 3) |
+          ((b & 0b10000000) >> 4) | ((b & 0b00100000) >> 3) | ((b & 0b00001000) >> 2) | ((b & 0b00000010) >> 1);
+        let outputB =
+          ((a & 0b01000000) << 1) | ((a & 0b00010000) << 2) | ((a & 0b00000100) << 3) | ((a & 0b00000001) << 4) |
+          ((b & 0b01000000) >> 3) | ((b & 0b00010000) >> 2) | ((b & 0b00000100) >> 1) | (b & 0b00000001);
+
+        outputBuffer.push(outputA, outputB);
+      }
+    }
+
+    this.bitmapBuffer = new Uint8Array(outputBuffer);
     this.updateBitmapPreview(buffer);
   }
 
@@ -293,6 +301,8 @@ class Processor {
       // title bitmap
       // romFile.writeByteUntil(0xFF, romFileIndex + 63 + 192); // solid black
       romFile.writeBytes(rom.bitmapBuffer);
+
+      rom.bitmapBuffer
 
       romFileIndex += 512
     }

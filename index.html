@@ -4,7 +4,6 @@
     <title>Game Boy Nintendo Power ROM Builder</title>
     <script src="script/vue.js"></script>
     <script src="script/gbnp.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
 
@@ -97,7 +96,7 @@
       <h2>3. Download Files</h2>
       <section>
         <div>
-          <label id="filename-label" for="filename-input">Filename: </label><input id="filename-input" type="text" :value="filename"/>
+          <label id="filename-label" for="filename-input">Filename: </label><input id="filename-input" type="text" v-model:value="filename"/>
         </div>
         <br/>
         <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>

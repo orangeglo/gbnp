@@ -10,6 +10,13 @@ html {
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Early-Gameboy";
+  src: url("./Early-Gameboy.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 h1 {
   color: #000079;
 }
