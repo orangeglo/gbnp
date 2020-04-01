@@ -13,7 +13,8 @@ let app = new Vue({
     processor: new Processor([]),
     filename: 'GBNP',
     mapData: '',
-    romData: ''
+    romData: '',
+    fontIndex: 0
   },
   created: function() {
     this.processor.menu = this.menu;
@@ -23,6 +24,11 @@ let app = new Vue({
       return (this.roms.length > 0) && this.menu.present() && this.menu.valid() && !this.romOverflow;
     },
     romOverflow: function() { return this.processor.romOverflow(); }
+  },
+  watch: {
+    fontIndex: function() {
+      for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
+    }
   },
   methods: {
     addMenu: function(e) {
@@ -34,7 +40,7 @@ let app = new Vue({
     },
     addROM: function(e) {
       let fileReader = new FileReader()
-      fileReader.onload = () => this.roms.push(new ROM(fileReader.result));
+      fileReader.onload = () => this.roms.push(new ROM(fileReader.result, this.fontIndex));
       fileReader.readAsArrayBuffer(e.target.files[0]);
 
       this.processor.roms = this.roms;
@@ -67,8 +73,8 @@ let app = new Vue({
     },
     updateMenuText: function(rom, val) {
       if (rom.bitmapTimeoutHandle) { clearTimeout(rom.bitmapTimeoutHandle); }
-      rom.bitmapTimeoutHandle = setTimeout(function() {
-        rom.updateMenuText(val);
+      rom.bitmapTimeoutHandle = setTimeout(() => {
+        rom.updateMenuText(val, this.fontIndex);
       }, 500);
     },
     stopPropagation: function(e) { e.stopImmediatePropagation(); },

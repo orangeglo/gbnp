@@ -93,12 +93,41 @@
         </table>
       </section>
 
-      <h2>3. Download Files</h2>
-      <section>
-        <div>
-          <label id="filename-label" for="filename-input">Filename: </label><input id="filename-input" type="text" v-model:value="filename"/>
+      <h2>3. Tweak Settings </h2>
+      <section class="flex-container">
+        <div class="flex-column">
+          <div>
+            <span class="settings-label">Menu Font: </span>
+          </div>
+
+          <div>
+            <label class="settings-label" id="filename-label" for="filename-input">Filename: </label>
+          </div>
         </div>
-        <br/>
+
+        <div class="flex-column">
+          <div>
+            <input type="radio" id="font0" name="font" value="0" v-model="fontIndex">
+            <label for="font0" id="pixeltype" class="radio-label">Pixeltype</label>
+
+            <input type="radio" id="font1" name="font" value="1" v-model="fontIndex">
+            <label for="font1" id="gameboy" class="radio-label">Game Boy</label>
+
+            <input type="radio" id="font2" name="font" value="2" v-model="fontIndex">
+            <label for="font2" id="nokia" class="radio-label">Nokia</label>
+
+            <input type="radio" id="font3" name="font" value="3" v-model="fontIndex">
+            <label for="font3" id="gamer" class="radio-label">Gamer</label>
+          </div>
+
+          <div>
+            <input id="filename-input" type="text" v-model:value="filename"/>
+          </div>
+        </div>
+      </section>
+
+      <h2>4. Download Files</h2>
+      <section>
         <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
         /
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
@@ -106,7 +135,11 @@
     </div>
 
     <footer>
-      v0.1 - built by orangeglo - <a href="https://github.com/orangeglo/gbnp">view this project on github</a>
+      v0.1
+      -
+      built by orangeglo
+      -
+      <a href="https://github.com/orangeglo/gbnp">view this project on github</a>
     </footer>
 
     <script src="script/app.js"></script>

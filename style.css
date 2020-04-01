@@ -1,20 +1,41 @@
-html {
-  font-family: sans-serif;
-  line-height: 1.4;
-}
-
 @font-face {
   font-family: "GillSans-HeavyItalic";
-  src: url("./GillSansHeavyItalic.woff") format("woff");
+  src: url("./font/GillSansHeavyItalic.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Early-Gameboy";
-  src: url("./Early-Gameboy.woff") format("woff");
+  src: url("./font/Early-Gameboy.woff") format("woff");
   font-weight: normal;
   font-style: normal;
+}
+
+@font-face {
+  font-family: "Gamer";
+  src: url("./font/Gamer.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Pixeltype";
+  src: url("./font/Pixeltype.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Nokia";
+  src: url("./font/Nokia.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  font-family: sans-serif;
+  line-height: 1.4;
 }
 
 h1 {
@@ -104,11 +125,6 @@ td.overflow {
   background-color: red;
 }
 
-#filename-label {
-  font-weight: bold;
-  margin-right: 20px;
-}
-
 thead tr {
   border-bottom: 1px solid #ddd;
 }
@@ -119,4 +135,46 @@ tfoot tr {
 
 tbody tr:nth-child(odd) {
   background-color: #f2f2f2;
+}
+
+.settings-label {
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+label.radio-label {
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+label#pixeltype {
+  font-family: 'Pixeltype';
+  font-size: 32px;
+  line-height: 0;
+  position: relative;
+  top: 3px;
+}
+
+label#gameboy {
+  font-family: 'Early-Gameboy';
+}
+
+label#nokia {
+  font-family: 'Nokia';
+}
+
+label#gamer {
+  font-family: Gamer;
+  font-size: 32px;
+  line-height: 0;
+  position: relative;
+  top: -2px;
+}
+
+.flex-container {
+  display: flex;
+}
+
+.flex-column * {
+  margin-bottom: 8px;
 }

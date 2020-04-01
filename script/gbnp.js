@@ -13,6 +13,12 @@ const BITMAP_PREVIEW_BYTES = [
   [0x66, 0x66, 0x66, 0xFF], // dark grey
   [0x00, 0x00, 0x00, 0xFF] // black
 ]
+const FONTS = [
+  { style: 'normal 16px Pixeltype', y: 7 },
+  { style: 'normal 8px Early-Gameboy', y: 7 },
+  { style: 'normal 8px Nokia', y: 7 },
+  { style: 'normal 16px Gamer', y: 7 }
+]
 
 class Menu {
   constructor() {
@@ -45,7 +51,7 @@ class Menu {
 }
 
 class ROM {
-  constructor(arrayBuffer) {
+  constructor(arrayBuffer, fontIndex) {
     let file = new FileSeeker(arrayBuffer);
 
     file.seek(0x134);
@@ -67,7 +73,7 @@ class ROM {
     let paddedFile = new FileSeeker(this.arrayBuffer);
     paddedFile.writeBytes(file.read(file.size()));
 
-    this.updateBitmap();
+    this.updateBitmap(fontIndex);
 
     // add error for "invalid" rom (IE not a gb rom file)
     if (!this.type) { alert('Cartridge type could not be determined!') }
@@ -90,12 +96,12 @@ class ROM {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
   }
 
-  updateMenuText(text) {
+  updateMenuText(text, fontIndex) {
     this.menuText = text;
-    this.updateBitmap();
+    this.updateBitmap(fontIndex);
   }
 
-  updateBitmap() {
+  updateBitmap(fontIndex) {
     let buffer = [];
 
     const canvas = document.createElement("canvas");
@@ -105,9 +111,10 @@ class ROM {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, 96, 8);
-    ctx.font = '8px Early-Gameboy'
-    ctx.fillStyle = '#777';
-    ctx.fillText(this.menuText,1,7);
+    const font = FONTS[fontIndex || 0];
+    ctx.font = font.style;
+    ctx.fillStyle = 'black';
+    ctx.fillText(this.menuText,1,font.y);
     const imageData = ctx.getImageData(0, 0, 96, 8).data;
 
     for (let i = 0; i < imageData.length; i+=16){
