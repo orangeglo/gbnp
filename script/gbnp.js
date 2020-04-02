@@ -48,6 +48,7 @@ class Menu {
   }
 
   setData(arrayBuffer) {
+    this._valid = null;
     this.data = new Uint8Array(arrayBuffer);
     if (this.valid()) {
       localStorage.setItem('menuData', JSON.stringify({ data: Array.from(this.data) }));

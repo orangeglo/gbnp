@@ -23,7 +23,7 @@
         <p v-if="!menu.present()">
           Menu is not loaded. Please upload a menu ROM.
         </p>
-        <p v-if="!menu.valid()">
+        <p v-if="menu.present() && !menu.valid()">
           Menu is not valid. Please upload a valid menu ROM.
         </p>
         <p v-if="menu.loadedFromStorage && menu.valid()">
