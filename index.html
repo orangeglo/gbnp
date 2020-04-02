@@ -14,6 +14,9 @@
     <div class='text-container'>
       This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>. The cartridge can store up to seven roms, or a total of 896KB of game data. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
     </div>
+    <noscript>
+      Looks like you have JS disabled. This tool needs javascript to function!
+    </noscript>
     <div id="app">
       <h2>
         1. Upload Menu ROM
@@ -21,18 +24,18 @@
         <span v-if="!menu.ready()" style="color: red">✗</span>
       </h2>
       <section>
-        <p v-if="!menu.present()">
-          Menu is not loaded. Please upload a menu ROM.
-        </p>
-        <p v-if="menu.present() && !menu.valid()">
-          Menu is not valid. Please upload a valid menu ROM.
-        </p>
-        <p v-if="menu.loadedFromStorage && menu.valid()">
-          Menu loaded from storage! You're all set.
-        </p>
-        <p v-if="!menu.loadedFromStorage && menu.ready()">
-          Menu loaded and cached! You're all set.
-        </p>
+        <div v-if="!menu.present()">
+          <p>Menu is not loaded. Please upload GB Memory Multi Menu (NP M-MENU) ROM.</p>
+        </div>
+        <div v-if="menu.present() && !menu.valid()">
+          <p>Menu is not valid. Please upload GB Memory Multi Menu (NP M-MENU) ROM.</p>
+        </div>
+        <div v-if="menu.loadedFromStorage && menu.valid()">
+          <p>Menu loaded from storage! You're all set.</p>
+        </div>
+        <div v-if="!menu.loadedFromStorage && menu.ready()">
+          <p>Menu loaded and cached! You're all set.</p>
+        </div>
         <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
           <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Upload Menu</label>
         </button>
@@ -50,9 +53,10 @@
             <tr>
               <th></th>
               <th>Title</th>
-              <th>Type</th>
-              <th>ROM (KB)</th>
-              <th>RAM (KB)</th>
+              <th>Mapper</th>
+              <th>ROM</th>
+              <th>RAM</th>
+              <th>Blocks</th>
               <th>Menu Title</th>
               <th>Preview</th>
             </tr>
@@ -66,8 +70,9 @@
               </td>
               <td>{{ rom.title }}</td>
               <td>{{ rom.type }}</td>
-              <td>{{ rom.padded() ? '128 (' + rom.romSizeKB() + ')' : rom.romSizeKB() }}</td>
-              <td>{{ rom.ramSizeKB() }}</td>
+              <td>{{ rom.romSizeKB() + 'k'}}</td>
+              <td>{{ rom.ramSizeKB() + 'k' }}</td>
+              <td>{{ rom.paddedRomSizeKB() / 128 + ' (' + rom.paddedRomSizeKB() + 'k)'}}</td>
               <td>
                 <input type="text" class='menu-text' :value="rom.menuText" @input="e => updateMenuText(rom, e.target.value)"/>
               </td>
@@ -86,9 +91,14 @@
               </td>
               <td></td>
               <td></td>
-              <td :class="{ overflow: romOverflow }">{{ processor.romUsedKB() }}</td>
-              <td>{{ processor.ramUsedKB() }}</td>
-              <td></td>
+              <td>{{ processor.romTotalKB() + 'k' }}</td>
+              <td>{{ processor.ramUsedKB() + 'k' }}</td>
+              <td :class="{ overflow: romOverflow }">
+                {{ processor.romUsedKB() / 128 + ' (' + processor.romUsedKB() + 'k)'}}
+              </td>
+              <td :class="{ overflow: romOverflow }">
+                <span v-if="romOverflow">Limit is 7 blocks</span>
+              </td>
               <td></td>
             </tr>
           </tfoot>
@@ -96,35 +106,31 @@
       </section>
 
       <h2>3. Tweak Settings </h2>
-      <section class="flex-container">
-        <div class="flex-column">
-          <div>
-            <span class="settings-label">Menu Font: </span>
-          </div>
+      <section>
+        <div class="settings-row">
+          <span class="settings-label">Menu Font: </span>
 
-          <div>
-            <label class="settings-label" id="filename-label" for="filename-input">Filename: </label>
-          </div>
+          <input type="radio" id="font0" name="font" value="0" v-model="fontIndex">
+          <label for="font0" id="pixeltype" class="radio-label">Pixeltype</label>
+
+          <input type="radio" id="font1" name="font" value="1" v-model="fontIndex">
+          <label for="font1" id="gameboy" class="radio-label">Game Boy</label>
+
+          <input type="radio" id="font2" name="font" value="2" v-model="fontIndex">
+          <label for="font2" id="nokia" class="radio-label">Nokia</label>
+
+          <input type="radio" id="font3" name="font" value="3" v-model="fontIndex">
+          <label for="font3" id="gamer" class="radio-label">Gamer</label>
         </div>
 
-        <div class="flex-column">
-          <div>
-            <input type="radio" id="font0" name="font" value="0" v-model="fontIndex">
-            <label for="font0" id="pixeltype" class="radio-label">Pixeltype</label>
+        <div class="settings-row">
+          <label class="settings-label" id="disableCGB-label" for="disableCGB-input">Force DMG Mode: </label>
+          <input id="disableCGB-input" type="checkbox" v-model:checked="disableCGB"/>
+        </div>
 
-            <input type="radio" id="font1" name="font" value="1" v-model="fontIndex">
-            <label for="font1" id="gameboy" class="radio-label">Game Boy</label>
-
-            <input type="radio" id="font2" name="font" value="2" v-model="fontIndex">
-            <label for="font2" id="nokia" class="radio-label">Nokia</label>
-
-            <input type="radio" id="font3" name="font" value="3" v-model="fontIndex">
-            <label for="font3" id="gamer" class="radio-label">Gamer</label>
-          </div>
-
-          <div>
-            <input id="filename-input" type="text" v-model:value="filename"/>
-          </div>
+        <div class="settings-row">
+          <label class="settings-label" id="filename-label" for="filename-input">Filename: </label>
+          <input id="filename-input" type="text" v-model:value="filename"/>
         </div>
       </section>
 
@@ -137,11 +143,9 @@
     </div>
 
     <footer>
-      v0.1
-      -
-      built by orangeglo
-      -
       <a href="https://github.com/orangeglo/gbnp">view this project on github</a>
+      -
+      by orangeglo (orangeglo#6197 on Discord)
     </footer>
 
     <script src="script/app.js"></script>

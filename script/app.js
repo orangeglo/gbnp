@@ -7,10 +7,12 @@ let app = new Vue({
     filename: 'GBNP',
     mapData: '',
     romData: '',
-    fontIndex: 0
+    fontIndex: 0,
+    disableCGB: false
   },
   created: function() {
     this.processor.menu = this.menu;
+    this.processor.disableCGB = this.disableCGB;
   },
   computed: {
     downloadEnabled: function() {
@@ -21,6 +23,9 @@ let app = new Vue({
   watch: {
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
+    },
+    disableCGB: function() {
+      this.processor.disableCGB = this.disableCGB;
     }
   },
   methods: {

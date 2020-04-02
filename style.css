@@ -1,11 +1,4 @@
 @font-face {
-  font-family: "GillSans-HeavyItalic";
-  src: url("./font/GillSansHeavyItalic.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
   font-family: "Gameboy";
   src: url("./font/Gameboy.woff") format("woff");
   font-weight: normal;
@@ -43,8 +36,11 @@ h1 {
 }
 
 h1, h2 {
-  font-family: 'GillSans-HeavyItalic', sans-serif;
-  padding-top: 10px;
+  padding: 5px 0 3px 0;
+  font-style: italic;
+  font-weight: bold;
+  text-shadow: 1px 0;
+  letter-spacing: 1px;
 }
 
 h2 {
@@ -61,7 +57,6 @@ p {
 footer {
   margin-top: 40px;
   font-size: 0.75em;
-  font-weight: bold;
   color: #444;
 }
 
@@ -90,6 +85,7 @@ button[disabled='disabled'] {
 
 .text-container {
   width: 850px;
+  margin-bottom:25px;
 }
 
 a {
@@ -118,7 +114,7 @@ table {
 
 th, td {
   text-align: left;
-  padding: 5px;
+  padding: 7px;
 }
 
 td.overflow {
@@ -140,6 +136,21 @@ tbody tr:nth-child(odd) {
 .settings-label {
   font-weight: bold;
   margin-right: 20px;
+  min-width: 150px;
+  display: inline-block;
+}
+
+.settings-row {
+  margin-bottom: 15px;
+}
+
+.menu-hint {
+  font-size: 0.75em;
+  color: #444;
+}
+
+.tooltip {
+  cursor: help;
 }
 
 label.radio-label {
@@ -171,10 +182,7 @@ label#gamer {
   top: -2px;
 }
 
-.flex-container {
-  display: flex;
-}
-
-.flex-column * {
-  margin-bottom: 8px;
+noscript {
+  font-weight: bold;
+  color: red;
 }

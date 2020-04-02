@@ -1,10 +1,10 @@
 const CARTRIDGE_TYPES = [
-  'ROM Only',
-  'MBC1', 'MBC1+RAM', 'MBC1+RAM+BATTERY', null,
-  'MBC2', 'MBC2+BATTERY', null,
-  'ROM+RAM', 'ROM+RAM+BATTERY', null, null, null, null, null,
-  'MBC3+TIMER+BATTERY', 'MBC3+TIMER+RAM+BATTERY', 'MBC3', 'MBC3+RAM', 'MBC3+RAM+BATTERY', null, null, null, null, null,
-  'MBC5', 'MBC5+RAM', 'MBC5+RAM+BATTERY', 'MBC5+RUMBLE', 'MBC5+RUMBLE+RAM', 'MBC5+RUMBLE+RAM+BATTERY'
+  'None',
+  'MBC1', 'MBC1', 'MBC1', null,
+  'MBC2', 'MBC2', null,
+  'None', 'None', null, null, null, null, null,
+  'MBC3', 'MBC3', 'MBC3', 'MBC3', 'MBC3', null, null, null, null, null,
+  'MBC5', 'MBC5', 'MBC5', 'MBC5', 'MBC5', 'MBC5'
 ];
 const MAP_TRAILER_BYTES = [0x02, 0x00, 0x30, 0x12, 0x99, 0x11, 0x12, 0x20, 0x37, 0x57, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00];
 const BITMAP_PREVIEW_BYTES = [
@@ -189,6 +189,13 @@ class Processor {
   constructor(roms) {
     this.roms = roms;
     this.menu = null;
+    this.disableCGB = false;
+  }
+
+  romTotalKB() {
+    return this.roms.reduce((total, rom) => {
+      return total += rom.romSizeKB();
+    }, 0);
   }
 
   romUsedKB() {
@@ -287,6 +294,14 @@ class Processor {
     // copy menu data
     romFile.writeBytes(this.menu.data);
 
+    // apply cgb hack
+    if (this.disableCGB) {
+      romFile.seek(0x143);
+      romFile.writeByte(0);
+      romFile.seek(0x14D); // fix checksum
+      romFile.writeByte((0xD3 + 0x80) % 0xFF);
+    }
+
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
 
@@ -321,7 +336,6 @@ class Processor {
       romFile.seek(romFileIndex + 63);
 
       // title bitmap
-      // romFile.writeByteUntil(0xFF, romFileIndex + 63 + 192); // solid black
       romFile.writeBytes(rom.bitmapBuffer);
 
       rom.bitmapBuffer
