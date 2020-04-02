@@ -35,12 +35,12 @@ class Menu {
   }
 
   valid() {
-    if (!this._valid) {
+    if (!this._valid && this.data) {
       let title = String.fromCharCode(...this.data.slice(308, 317));
       this._valid = (title == 'NP M-MENU');
     }
 
-    return this._valid;
+    return this._valid || false;
   }
 
   ready() {
