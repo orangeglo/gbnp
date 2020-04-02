@@ -35,7 +35,12 @@ class Menu {
   }
 
   valid() {
-    return true;
+    if (!this._valid) {
+      let title = String.fromCharCode(...this.data.slice(308, 317));
+      this._valid = (title == 'NP M-MENU');
+    }
+
+    return this._valid;
   }
 
   ready() {
@@ -75,9 +80,18 @@ class ROM {
 
     this.updateBitmap(fontIndex);
 
-    // add error for "invalid" rom (IE not a gb rom file)
+    if (!this.valid()) { alert('File is not a valid Game Boy ROM!') }
     if (!this.type) { alert('Cartridge type could not be determined!') }
     if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!') }
+  }
+
+  valid() {
+    if (!this._valid) {
+      let check = Array.from(new Uint8Array(this.arrayBuffer.slice(260, 265)));
+      this._valid = (JSON.stringify(check) === JSON.stringify([0xCE,0xED,0x66, 0x66, 0xCC]));
+    }
+
+    return this._valid;
   }
 
   romSizeKB() {

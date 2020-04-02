@@ -1,10 +1,3 @@
-/*
-  TODO:
-  - Implement bitmap writing
-  - implement basic menu validation
-  - implement basic rom validation
-*/
-
 let app = new Vue({
   el: '#app',
   data: {
