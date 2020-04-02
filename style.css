@@ -1,34 +1,34 @@
 @font-face {
   font-family: "GillSans-HeavyItalic";
-  src: url("../gbnp/font/GillSansHeavyItalic.woff") format("woff");
+  src: url("./font/GillSansHeavyItalic.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Early-Gameboy";
-  src: url("../gbnp/font/EarlyGameboy.woff") format("woff");
+  src: url("./font/EarlyGameboy.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Gamer";
-  src: url("../gbnp/font/Gamer.woff") format("woff");
+  src: url("./font/Gamer.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Pixeltype";
-  src: url("../gbnp/font/Pixeltype.woff") format("woff");
+  src: url("./font/Pixeltype.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Nokia";
-  src: url("../gbnp/font/Nokia.woff") format("woff");
+  src: url("./font/Nokia.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
