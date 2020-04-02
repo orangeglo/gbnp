@@ -15,7 +15,7 @@ const BITMAP_PREVIEW_BYTES = [
 ]
 const FONTS = [
   { style: 'normal 16px Pixeltype', y: 7 },
-  { style: 'normal 8px Early-Gameboy', y: 7 },
+  { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
   { style: 'normal 16px Gamer', y: 7 }
 ]

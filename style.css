@@ -6,8 +6,8 @@
 }
 
 @font-face {
-  font-family: "Early-Gameboy";
-  src: url("./font/EarlyGameboy.woff") format("woff");
+  font-family: "Gameboy";
+  src: url("./font/Gameboy.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -156,7 +156,7 @@ label#pixeltype {
 }
 
 label#gameboy {
-  font-family: 'Early-Gameboy';
+  font-family: 'Gameboy';
 }
 
 label#nokia {
