@@ -299,8 +299,17 @@ class Processor {
       romFile.seek(0x143);
       romFile.writeByte(0);
       romFile.seek(0x14D); // fix checksum
-      romFile.writeByte((0xD3 + 0x80) % 0xFF);
+      romFile.writeByte(83);
     }
+
+    // fix header checksum
+    // let checksum = 0;
+    // for (let i = 0x134; i <= 0x14C; i++) {
+    //   romFile.seek(i);
+    //   checksum = ((checksum - romFile.readByte() - 1) & 0xFF)
+    // }
+    // romFile.seek(0x14D); // fix checksum
+    // romFile.writeByte(checksum);
 
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
