@@ -8,11 +8,13 @@ let app = new Vue({
     mapData: '',
     romData: '',
     fontIndex: 0,
-    disableCGB: false
+    disableCGB: false,
+    forceDMG: false
   },
   created: function() {
     this.processor.menu = this.menu;
     this.processor.disableCGB = this.disableCGB;
+    this.processor.forceDMG = this.forceDMG;
   },
   computed: {
     downloadEnabled: function() {
@@ -26,6 +28,9 @@ let app = new Vue({
     },
     disableCGB: function() {
       this.processor.disableCGB = this.disableCGB;
+    },
+    forceDMG: function() {
+      this.processor.forceDMG = this.forceDMG;
     }
   },
   methods: {

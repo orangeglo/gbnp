@@ -190,6 +190,7 @@ class Processor {
     this.roms = roms;
     this.menu = null;
     this.disableCGB = false;
+    this.forceDMG = false;
   }
 
   romTotalKB() {
@@ -302,14 +303,11 @@ class Processor {
       romFile.writeByte(83);
     }
 
-    // fix header checksum
-    // let checksum = 0;
-    // for (let i = 0x134; i <= 0x14C; i++) {
-    //   romFile.seek(i);
-    //   checksum = ((checksum - romFile.readByte() - 1) & 0xFF)
-    // }
-    // romFile.seek(0x14D); // fix checksum
-    // romFile.writeByte(checksum);
+    // apply dmg menu hack
+    if (this.forceDMG) {
+      romFile.seek(0x154);
+      romFile.writeByte(0x11);
+    }
 
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
