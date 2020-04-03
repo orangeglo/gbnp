@@ -305,8 +305,10 @@ class Processor {
 
     // apply dmg menu hack
     if (this.forceDMG) {
-      romFile.seek(0x154);
-      romFile.writeByte(0x11);
+      romFile.seek(0x100);
+      romFile.writeByte(0xAF);
+      romFile.seek(0x150);
+      romFile.writeBytes([0x3C, 0xE0, 0xFE, 0x3D]);
     }
 
     let romBase = 0x01;

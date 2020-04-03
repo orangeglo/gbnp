@@ -126,24 +126,26 @@
         <div class="settings-row">
           <label class="settings-label" id="disableCGB-label" for="disableCGB-input">Disable CGB Palette: </label>
           <input id="disableCGB-input" type="checkbox" v-model:checked="disableCGB"/>
+          The Game Boy will treat the menu as a non-color ROM.
         </div>
 
         <div class="settings-row">
-          <label class="settings-label" id="forceDMG-label" for="forceDMG-input">Force DMG Menu: </label>
+          <label class="settings-label" id="forceDMG-label" for="forceDMG-input">Force DMG Menu/Music: </label>
           <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
+          The more minimal DMG menu and music will be used. <a href="img/menu_comparison.png">Comparison here.</a>
         </div>
 
         <div class="settings-row">
-          <label class="settings-label" id="filename-label" for="filename-input">Filename: </label>
+          <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>
           <input id="filename-input" type="text" v-model:value="filename"/>
         </div>
       </section>
 
       <h2>4. Download Files</h2>
       <section>
-        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
-        /
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
+        /
+        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
       </section>
     </div>
 
