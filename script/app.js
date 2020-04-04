@@ -44,7 +44,9 @@ let app = new Vue({
     addROM: function(e) {
       let fileReader = new FileReader()
       fileReader.onload = () => this.roms.push(new ROM(fileReader.result, this.fontIndex));
-      fileReader.readAsArrayBuffer(e.target.files[0]);
+      for (let i = 0; i < e.target.files.length; i++){
+        fileReader.readAsArrayBuffer(e.target.files[i]);
+      }
 
       this.processor.roms = this.roms;
 
@@ -87,9 +89,10 @@ let app = new Vue({
 });
 
 Vue.component('bitmap-preview', {
-  props: ['data'],
+  props: ['data', 'rom', 'index'],
   mounted: function() {
     this.renderCanvas();
+    console.log(this.rom.title);
   },
   watch: {
     data: function() {
@@ -98,14 +101,36 @@ Vue.component('bitmap-preview', {
   },
   methods: {
     renderCanvas: function() {
-      let canvas = this.$refs.canvas;
+      const canvas = this.$refs.canvas;
       const ctx = canvas.getContext('2d');
       ctx.putImageData(new ImageData(this.data, 96, 8), 0, 0);
       ctx.imageSmoothingEnabled = false;
       ctx.scale(2, 2);
       ctx.drawImage(ctx.canvas, 0, 0);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
+    },
+    addImage: function(e) {
+      const rom = this.rom;
+      const imageReader = new FileReader();
+      imageReader.onload = function(e) {
+        const img = new Image();
+        img.addEventListener("load", function(e) {
+          rom.updateBitmap(null, e.target);
+        });
+        img.src = e.target.result;
+      };       
+      imageReader.readAsDataURL(e.target.files[0]);
+    },
+    triggerAddImageLabel: function () { this.$refs.addImageLabel.click(); },
+    stopPropagation: function(e) { app.stopPropagation(e); }
   },
-  template: '<canvas width="192" height="16" ref="canvas"></canvas>'
+  template: `
+    <div>
+      <canvas width="192" height="16" ref="canvas"></canvas>
+      <button v-on:click="triggerAddImageLabel" type="button">
+        <label :for="'imageFileInput-' + index" ref="addImageLabel" v-on:click="stopPropagation">Upload</label>
+      </button>
+      <input style="display: none" :id="'imageFileInput-' + index" type="file" v-on:change="addImage">
+    </div>`
 });
+
