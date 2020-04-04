@@ -13,8 +13,10 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 - Pokemon Classic Font: https://www.dafont.com/pokemon-classic.font
 
 ## Ideas
+- Load roms from menu file
 - Move more templating into components
 - Add ability to upload arbitrary 128x8 images for menu entries
 - Save settings to local storage
 - A setting to change scrolling ticker text
 - Upload custom background iamge
+- JP font for titles
