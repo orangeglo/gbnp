@@ -15,10 +15,9 @@ const BITMAP_PREVIEW_BYTES = [
 ]
 const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
-  { style: 'normal 16px Pixeltype', y: 7 },
+  { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
-  { style: 'normal 16px Gamer', y: 7 },
-  { style: 'normal 8px Pokemon', y: 7 },
+  { style: 'normal 16px Gamer', y: 7 }
 ]
 
 class Menu {
@@ -83,8 +82,8 @@ class ROM {
     this.updateBitmap(fontIndex);
 
     if (!this.valid()) { alert('File is not a valid Game Boy ROM!') }
-    if (!this.type) { alert('Cartridge type could not be determined!') }
-    if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!') }
+    else if (!this.type) { alert('Cartridge type could not be determined!') }
+    else if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!') }
   }
 
   valid() {
@@ -361,6 +360,32 @@ class Processor {
     }
 
     return new Uint8Array(romBuffer);
+  }
+
+  parseMenuData(fontIndex) {
+    this.roms = [];
+    const menuBuffer = (new Uint8Array(this.menu.data)).buffer;
+    const menuFile = new FileSeeker(menuBuffer);
+
+    let romSizes = [];
+    for (let i = 0; i < 7; i++) {
+      const indexPosition = 0x1C200 + i * 512
+      menuFile.seek(indexPosition);
+      const byte = menuFile.readByte();
+      if (byte > 0 && byte < 8) {
+        menuFile.seek(indexPosition + 3)
+        romSizes.push(menuFile.readByte());
+      }
+    }
+
+    menuFile.seek(0x20000)
+    for (let i = 0; i < romSizes.length; i++) {
+      const romData = menuFile.read(romSizes[i] * 128 * 1024);
+      const romBuffer = (new Uint8Array(romData)).buffer;
+      this.roms.push(new ROM(romBuffer, fontIndex))
+    }
+
+    return this.roms;
   }
 }
 

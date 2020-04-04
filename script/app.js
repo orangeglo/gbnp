@@ -16,27 +16,42 @@ let app = new Vue({
     this.processor.disableCGB = this.disableCGB;
     this.processor.forceDMG = this.forceDMG;
   },
+  mounted: function() {
+    this.loadSettings();
+    document.fonts.load(FONTS[this.fontIndex].style).then(() => {
+      this.roms = this.processor.parseMenuData(this.fontIndex);
+    });
+  },
   computed: {
     downloadEnabled: function() {
-      return (this.roms.length > 0) && this.menu.present() && this.menu.valid() && !this.romOverflow;
+      return this.menu.present() && this.menu.valid() && !this.romOverflow;
     },
     romOverflow: function() { return this.processor.romOverflow(); }
   },
   watch: {
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
+      localStorage.setItem('fontIndex', this.fontIndex);
+    },
+    filename: function() {
+      localStorage.setItem('filename', this.filename);
     },
     disableCGB: function() {
       this.processor.disableCGB = this.disableCGB;
+      localStorage.setItem('disableCGB', this.disableCGB);
     },
     forceDMG: function() {
       this.processor.forceDMG = this.forceDMG;
+      localStorage.setItem('forceDMG', this.forceDMG);
     }
   },
   methods: {
     addMenu: function(e) {
       let fileReader = new FileReader()
-      fileReader.onload = () => this.menu.setData(fileReader.result);
+      fileReader.onload = () => {
+        this.menu.setData(fileReader.result);
+        this.roms = this.processor.parseMenuData();
+      }
       fileReader.readAsArrayBuffer(e.target.files[0]);
 
       e.target.value = '';
@@ -57,6 +72,10 @@ let app = new Vue({
     },
     removeROM: function(index) {
       this.roms.splice(index, 1);
+      this.processor.roms = this.roms;
+    },
+    removeAllRoms: function() {
+      this.roms = [];
       this.processor.roms = this.roms;
     },
     moveUp: function(index) {
@@ -84,6 +103,12 @@ let app = new Vue({
       rom.bitmapTimeoutHandle = setTimeout(() => {
         rom.updateMenuText(val, this.fontIndex);
       }, 500);
+    },
+    loadSettings: function() {
+      this.filename = localStorage.getItem('filename');
+      this.fontIndex = Number(localStorage.getItem('fontIndex'));
+      this.disableCGB = localStorage.getItem('disableCGB') === 'true'
+      this.forceDMG = localStorage.getItem('forceDMG') === 'true'
     },
     stopPropagation: function(e) { e.stopImmediatePropagation(); },
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },

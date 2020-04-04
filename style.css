@@ -27,7 +27,7 @@
 }
 
 @font-face {
-  font-family: "Pokemon";
+  font-family: "PokemonGB";
   src: url("./font/Pokemon.woff") format("woff");
   font-weight: normal;
   font-style: normal;
@@ -83,6 +83,10 @@ button label {
 }
 
 button#remove-rom {
+  color: red;
+}
+
+button.remove-all{
   color: red;
 }
 
@@ -165,14 +169,6 @@ label.radio-label {
   margin-right: 10px;
 }
 
-label#pixeltype {
-  font-family: 'Pixeltype';
-  font-size: 32px;
-  line-height: 0;
-  position: relative;
-  top: 3px;
-}
-
 label#gameboy {
   font-family: 'Gameboy';
 }
@@ -190,9 +186,9 @@ label#gamer {
 }
 
 label#pokemon {
-  font-family: 'Pokemon';
+  font-family: 'PokemonGB';
   position: relative;
-  top: -2px;
+  top: 3px;
 }
 
 noscript {
