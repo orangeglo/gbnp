@@ -13,7 +13,6 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 - Pokemon Classic Font: https://www.dafont.com/pokemon-classic.font
 
 ## Ideas
-- Upload multiple games at once
 - Move more templating into components
 - Add ability to upload arbitrary 128x8 images for menu entries
 - Save settings to local storage

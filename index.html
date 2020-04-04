@@ -85,9 +85,9 @@
             <tr>
               <td>
                 <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.ready() || romOverflow" type="button">
-                  <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Game</label>
+                  <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Games</label>
                 </button>
-                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.ready() || romOverflow" accept=".gb,.gbc">
+                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.ready() || romOverflow" accept=".gb,.gbc" multiple>
               </td>
               <td></td>
               <td></td>

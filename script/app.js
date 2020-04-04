@@ -42,9 +42,14 @@ let app = new Vue({
       e.target.value = '';
     },
     addROM: function(e) {
-      let fileReader = new FileReader()
-      fileReader.onload = () => this.roms.push(new ROM(fileReader.result, this.fontIndex));
-      fileReader.readAsArrayBuffer(e.target.files[0]);
+      const files = e.target.files;
+      for (let i = 0; i < files.length; i++) {
+        let fileReader = new FileReader();
+        fileReader.onload = () => {
+          this.roms.push(new ROM(fileReader.result, this.fontIndex));
+        }
+        fileReader.readAsArrayBuffer(files[i]);
+      }
 
       this.processor.roms = this.roms;
 
