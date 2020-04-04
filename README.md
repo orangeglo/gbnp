@@ -10,10 +10,12 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 - Early GameBoy Font: https://www.dafont.com/early-gameboy.font
 - Nokia Cellphone FC Font: https://www.dafont.com/nokia-cellphone.font
 - Gamer Font: https://www.dafont.com/gamer-2.font
+- Pokemon Classic Font: https://www.dafont.com/pokemon-classic.font
 
 ## Ideas
+- Upload multiple games at once
 - Move more templating into components
-- Add ability to upload arbitrary 96x8 images for menu entries
+- Add ability to upload arbitrary 128x8 images for menu entries
 - Save settings to local storage
 - A setting to change scrolling ticker text
-- Other romhacks to the menu?
+- Upload custom background iamge

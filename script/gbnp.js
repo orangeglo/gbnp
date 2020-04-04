@@ -14,10 +14,11 @@ const BITMAP_PREVIEW_BYTES = [
   [0x00, 0x00, 0x00, 0xFF] // black
 ]
 const FONTS = [
-  { style: 'normal 16px Pixeltype', y: 7 },
   { style: 'normal 8px Gameboy', y: 7 },
+  { style: 'normal 16px Pixeltype', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
-  { style: 'normal 16px Gamer', y: 7 }
+  { style: 'normal 16px Gamer', y: 7 },
+  { style: 'normal 8px Pokemon', y: 7 },
 ]
 
 class Menu {
@@ -121,16 +122,19 @@ class ROM {
 
     const canvas = document.createElement("canvas");
     canvas.height = 8;
-    canvas.width = 96;
+    canvas.width = 128;
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 96, 8);
+    ctx.fillRect(0, 0, 128, 8);
     const font = FONTS[fontIndex || 0];
     ctx.font = font.style;
     ctx.fillStyle = 'black';
     ctx.fillText(this.menuText,1,font.y);
-    const imageData = ctx.getImageData(0, 0, 96, 8).data;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(127, 0, 127, 8);
+
+    const imageData = ctx.getImageData(0, 0, 128, 8).data;
 
     for (let i = 0; i < imageData.length; i+=16){
       let byte = 0;
@@ -144,8 +148,8 @@ class ROM {
     }
 
     let outputBuffer = []
-    for (let h = 0; h < 24; h+=2) {
-      for (let i = h; i < 192; i+=24) {
+    for (let h = 0; h < 32; h+=2) {
+      for (let i = h; i < 256; i+=32) {
         let a = buffer[i]
         let b = buffer[i+1]
 
@@ -346,8 +350,6 @@ class Processor {
 
       // title bitmap
       romFile.writeBytes(rom.bitmapBuffer);
-
-      rom.bitmapBuffer
 
       romFileIndex += 512
     }

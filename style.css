@@ -26,6 +26,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Pokemon";
+  src: url("./font/Pokemon.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 html {
   font-family: sans-serif;
   line-height: 1.4;
@@ -175,9 +182,15 @@ label#nokia {
 }
 
 label#gamer {
-  font-family: Gamer;
+  font-family: 'Gamer';
   font-size: 32px;
   line-height: 0;
+  position: relative;
+  top: -2px;
+}
+
+label#pokemon {
+  font-family: 'Pokemon';
   position: relative;
   top: -2px;
 }

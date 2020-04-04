@@ -100,12 +100,12 @@ Vue.component('bitmap-preview', {
     renderCanvas: function() {
       let canvas = this.$refs.canvas;
       const ctx = canvas.getContext('2d');
-      ctx.putImageData(new ImageData(this.data, 96, 8), 0, 0);
+      ctx.putImageData(new ImageData(this.data, 128, 8), 0, 0);
       ctx.imageSmoothingEnabled = false;
       ctx.scale(2, 2);
       ctx.drawImage(ctx.canvas, 0, 0);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
   },
-  template: '<canvas width="192" height="16" ref="canvas"></canvas>'
+  template: '<canvas width="256" height="16" ref="canvas"></canvas>'
 });
