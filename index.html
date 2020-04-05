@@ -18,35 +18,7 @@
       Looks like you have JS disabled. This tool needs javascript to function!
     </noscript>
     <div id="app">
-      <h2>
-        1. Upload Menu ROM
-        <span v-if="menu.ready()" style="color: green">✓</span>
-        <span v-if="!menu.ready()" style="color: red">✗</span>
-      </h2>
-      <section>
-        <div v-if="!menu.present()">
-          <p>Menu is not loaded. Please upload GB Memory Multi Menu (NP M-MENU) ROM.</p>
-        </div>
-        <div v-if="menu.present() && !menu.valid()">
-          <p>Menu is not valid. Please upload GB Memory Multi Menu (NP M-MENU) ROM.</p>
-        </div>
-        <div v-if="menu.loadedFromStorage && menu.valid()">
-          <p>Menu loaded from browser storage. Any existing games were added. You're all set!</p>
-        </div>
-        <div v-if="!menu.loadedFromStorage && menu.ready()">
-          <p>Menu loaded and cached. Any existing games were added. You're all set!</p>
-        </div>
-        <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
-          <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Upload Menu</label>
-        </button>
-        <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
-      </section>
-
-      <h2>
-        2. Add Game ROMs
-        <span v-if="roms.length > 0 && !romOverflow" style="color: green">✓</span>
-        <span v-if="romOverflow"style="color: red">✗</span>
-      </h2>
+      <h2>1. Add Game ROMs</h2>
       <section>
         <table>
           <thead>
@@ -88,12 +60,17 @@
           <tfoot>
             <tr>
               <td>
-                <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.ready() || romOverflow" type="button">
+                <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.present() || romOverflow" type="button">
                   <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Games</label>
                 </button>
-                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.ready() || romOverflow" accept=".gb,.gbc" multiple>
+                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.present() || romOverflow" accept=".gb,.gbc" multiple>
               </td>
-              <td></td>
+              <td>
+                <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
+                  <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Load From File</label>
+                </button>
+                <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
+              </td>
               <td></td>
               <td>{{ processor.romTotalKB() + 'k' }}</td>
               <td>{{ processor.ramUsedKB() + 'k' }}</td>
@@ -109,7 +86,7 @@
         </table>
       </section>
 
-      <h2>3. Tweak Settings </h2>
+      <h2>2. Tweak Settings </h2>
       <section>
         <div class="settings-row">
           <span class="settings-label">Menu Font: </span>
@@ -145,7 +122,7 @@
         </div>
       </section>
 
-      <h2>4. Download Files</h2>
+      <h2>3. Download Files</h2>
       <section>
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
         /

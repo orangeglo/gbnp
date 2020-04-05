@@ -25,8 +25,10 @@ class Menu {
     this.data = null;
     const menuData = localStorage.getItem('menuData');
     if (menuData) {
-      this.loadedFromStorage = true;
       this.data = JSON.parse(menuData).data;
+      console.log("Menu data loaded from storage")
+    } else {
+      this.loadMenuDataFromScript();
     }
   }
 
@@ -34,25 +36,18 @@ class Menu {
     return !!this.data
   }
 
-  valid() {
-    if (!this._valid && this.data) {
-      let title = String.fromCharCode(...this.data.slice(308, 317));
-      this._valid = (title == 'NP M-MENU');
-    }
-
-    return this._valid || false;
-  }
-
-  ready() {
-    return this.present() && this.valid();
-  }
-
   setData(arrayBuffer) {
-    this._valid = null;
     this.data = new Uint8Array(arrayBuffer);
-    if (this.valid()) {
-      localStorage.setItem('menuData', JSON.stringify({ data: Array.from(this.data) }));
-    }
+    localStorage.setItem('menuData', JSON.stringify({ data: Array.from(this.data) }));
+    console.log("Menu data loaded from script")
+  }
+
+  loadMenuDataFromScript() {
+    const head = document.getElementsByTagName('head')[0];
+    const devScript = document.createElement('script');
+    devScript.src = 'script/menu.js';
+
+    head.appendChild(devScript);
   }
 }
 
@@ -362,9 +357,8 @@ class Processor {
     return new Uint8Array(romBuffer);
   }
 
-  parseMenuData(fontIndex) {
+  parseMenuData(menuBuffer) {
     this.roms = [];
-    const menuBuffer = (new Uint8Array(this.menu.data)).buffer;
     const menuFile = new FileSeeker(menuBuffer);
 
     let romSizes = [];
@@ -378,11 +372,20 @@ class Processor {
       }
     }
 
-    menuFile.seek(0x20000)
-    for (let i = 0; i < romSizes.length; i++) {
-      const romData = menuFile.read(romSizes[i] * 128 * 1024);
-      const romBuffer = (new Uint8Array(romData)).buffer;
-      this.roms.push(new ROM(romBuffer, fontIndex))
+    if (romSizes.length > 0) {
+      try {
+        menuFile.seek(0x20000)
+        for (let i = 0; i < romSizes.length; i++) {
+          const romData = menuFile.read(romSizes[i] * 128 * 1024);
+          const romBuffer = (new Uint8Array(romData)).buffer;
+          this.roms.push(new ROM(romBuffer))
+        }
+      } catch(e) {
+        console.log(e)
+        alert("Failed to parse roms!");
+      }
+    } else {
+      alert("No roms detected!")
     }
 
     return this.roms;
