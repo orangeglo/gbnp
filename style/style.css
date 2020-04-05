@@ -1,34 +1,27 @@
 @font-face {
   font-family: "Gameboy";
-  src: url("./font/Gameboy.woff") format("woff");
+  src: url("../font/Gameboy.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Gamer";
-  src: url("./font/Gamer.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Pixeltype";
-  src: url("./font/Pixeltype.woff") format("woff");
+  src: url("../font/Gamer.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Nokia";
-  src: url("./font/Nokia.woff") format("woff");
+  src: url("../font/Nokia.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "PokemonGB";
-  src: url("./font/Pokemon.woff") format("woff");
+  src: url("../font/Pokemon.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
