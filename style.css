@@ -155,15 +155,6 @@ tbody tr:nth-child(odd) {
   margin-bottom: 15px;
 }
 
-.menu-hint {
-  font-size: 0.75em;
-  color: #444;
-}
-
-.tooltip {
-  cursor: help;
-}
-
 label.radio-label {
   vertical-align: middle;
   margin-right: 10px;
