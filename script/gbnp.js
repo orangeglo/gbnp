@@ -357,7 +357,7 @@ class Processor {
     return new Uint8Array(romBuffer);
   }
 
-  parseMenuData(menuBuffer) {
+  parseMenuData(menuBuffer, fontIndex) {
     this.roms = [];
     const menuFile = new FileSeeker(menuBuffer);
 
@@ -378,7 +378,7 @@ class Processor {
         for (let i = 0; i < romSizes.length; i++) {
           const romData = menuFile.read(romSizes[i] * 128 * 1024);
           const romBuffer = (new Uint8Array(romData)).buffer;
-          this.roms.push(new ROM(romBuffer))
+          this.roms.push(new ROM(romBuffer, fontIndex))
         }
       } catch(e) {
         console.log(e)

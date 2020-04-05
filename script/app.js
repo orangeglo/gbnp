@@ -33,7 +33,7 @@ let app = new Vue({
     addMenu: function(e) {
       let fileReader = new FileReader()
       fileReader.onload = () => {
-        this.roms = this.processor.parseMenuData(fileReader.result);
+        this.roms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
       }
       fileReader.readAsArrayBuffer(e.target.files[0]);
 
