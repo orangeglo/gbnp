@@ -184,11 +184,12 @@ class ROM {
 }
 
 class Processor {
-  constructor(roms) {
+  constructor(roms, tickerText) {
     this.roms = roms;
     this.menu = null;
     this.disableCGB = false;
     this.forceDMG = false;
+    this.tickerText = tickerText
   }
 
   romTotalKB() {
@@ -311,16 +312,18 @@ class Processor {
 
     // ticker text
     romFile.seek(0x18040);
-    romFile.writeByteUntil(0xFF, 0x18040 + 64); // blank initial white box
     romFile.writeByteUntil(0x00, 0x19140); // overwrite existing data
 
     romFile.seek(0x18040);
-    let testBuffer = [];
-    for (let i = 0; i < this.roms[0].bitmapBuffer.length; i++){
-      testBuffer.push(~this.roms[0].bitmapBuffer[i])
-    }
-    romFile.writeBytes(testBuffer);
+    romFile.writeBytes(Array.from(this.tickerText.bitmapBuffer));
 
+    // let testBuffer = [];
+    // for (let i = 0; i < this.roms[0].bitmapBuffer.length; i++){
+    //   testBuffer.push(~this.roms[0].bitmapBuffer[i])
+    // }
+    // romFile.writeBytes(testBuffer);
+
+    // romFile.writeByteUntil(0xFF, 0x18040 + 64); // blank initial white box
     // romFile.writeByteUntil(0xF0, 0x1C000); // scrolls for a long time (forever?)
 
 
@@ -404,6 +407,80 @@ class Processor {
     }
 
     return this.roms;
+  }
+}
+
+class TickerText {
+  constructor(text) {
+    this.text = text;
+    this.updateBitmap(text)
+  }
+
+  setText(text) {
+    this.text = text;
+    this.updateBitmap(text)
+  }
+
+  updateBitmap(text) {
+    let buffer = [];
+
+    // const canvas = document.createElement("canvas");
+    const canvas = document.getElementById("scratch-canvas");
+    canvas.height = 16;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.font = 'normal 10px sans-serif';
+    let width = Math.ceil(ctx.measureText(text).width)
+    for (let i = 0; i < 16; i++) {
+      if ((width % 16) == 0) { break; }
+      width++
+    }
+    width = Math.max(64, width);
+
+
+    canvas.width = width;
+    ctx.font = 'normal 10px sans-serif';
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.fillText(text,1,13);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+    for (let i = 0; i < imageData.length; i+=16){
+      let byte = 0;
+      for (let j = 0; j < 4; j++) {
+        let red = imageData[i+j*4];
+        if (red < 127) {
+          byte = byte | 0b11 << (6 - j*2);
+        }
+      }
+      buffer.push(byte)
+    }
+
+    let outputBuffer = []
+    console.log(imageData.length)
+    console.log(buffer);
+    console.log(canvas.width);
+    console.log(canvas.height);
+    console.log(Math.trunc(canvas.width/4))
+    for (let h = 0; h < Math.trunc(canvas.width/4); h+=2) {
+      for (let i = h; i < canvas.width * 4; i+=Math.trunc(canvas.width/4)) {
+        let a = buffer[i]
+        let b = buffer[i+1]
+
+        let outputA =
+          (a & 0b10000000) | ((a & 0b00100000) << 1) | ((a & 0b00001000) << 2) | ((a & 0b00000010) << 3) |
+          ((b & 0b10000000) >> 4) | ((b & 0b00100000) >> 3) | ((b & 0b00001000) >> 2) | ((b & 0b00000010) >> 1);
+        let outputB =
+          ((a & 0b01000000) << 1) | ((a & 0b00010000) << 2) | ((a & 0b00000100) << 3) | ((a & 0b00000001) << 4) |
+          ((b & 0b01000000) >> 3) | ((b & 0b00010000) >> 2) | ((b & 0b00000100) >> 1) | (b & 0b00000001);
+
+        outputBuffer.push(outputA, outputB);
+      }
+    }
+
+    this.bitmapBuffer = new Uint8Array(outputBuffer);
   }
 }
 

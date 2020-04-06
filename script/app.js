@@ -9,10 +9,12 @@ let app = new Vue({
     romData: '',
     fontIndex: 0,
     disableCGB: false,
-    forceDMG: false
+    forceDMG: false,
+    tickerText: new TickerText("Created with GBNP, orangeglo.github.io/gbnp/")
   },
   created: function() {
     this.processor.menu = this.menu;
+    this.processor.tickerText = this.tickerText;
     this.processor.disableCGB = this.disableCGB;
     this.processor.forceDMG = this.forceDMG;
   },
