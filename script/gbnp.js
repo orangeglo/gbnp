@@ -309,6 +309,21 @@ class Processor {
       romFile.writeBytes([0x3C, 0xE0, 0xFE, 0x3D]);
     }
 
+    // ticker text
+    romFile.seek(0x18040);
+    romFile.writeByteUntil(0xFF, 0x18040 + 64); // blank initial white box
+    romFile.writeByteUntil(0x00, 0x19140); // overwrite existing data
+
+    romFile.seek(0x18040);
+    let testBuffer = [];
+    for (let i = 0; i < this.roms[0].bitmapBuffer.length; i++){
+      testBuffer.push(~this.roms[0].bitmapBuffer[i])
+    }
+    romFile.writeBytes(testBuffer);
+
+    // romFile.writeByteUntil(0xF0, 0x1C000); // scrolls for a long time (forever?)
+
+
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
 
