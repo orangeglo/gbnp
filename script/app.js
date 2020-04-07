@@ -1,3 +1,79 @@
+Vue.component('bitmap-preview', {
+  props: ['data'],
+  mounted: function() {
+    this.renderCanvas();
+  },
+  watch: {
+    data: function() {
+      this.renderCanvas();
+    }
+  },
+  methods: {
+    renderCanvas: function() {
+      let canvas = this.$refs.canvas;
+      const ctx = canvas.getContext('2d');
+      ctx.putImageData(new ImageData(this.data, 128, 8), 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.scale(2, 2);
+      ctx.drawImage(ctx.canvas, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+  },
+  template: '<canvas width="256" height="16" ref="canvas"></canvas>'
+});
+
+Vue.component('ticker-settings', {
+  props: ['processor'],
+  data: function() {
+    return ({
+      fontIndex: 0,
+      text: "Created with GBNP on April 6, 2020"
+    });
+  },
+  mounted: function() {
+    this.updateBitmap();
+  },
+  methods: {
+    updateBitmap: function() {
+      const bitmap = (new TickerText(this.text, this.fontIndex, this.$refs.canvas)).generate()
+      this.processor.tickerBitmap = bitmap;
+    }
+  },
+  watch: {
+    fontIndex: function() { this.updateBitmap() },
+    text: function() { this.updateBitmap() }
+  },
+  template: `
+    <div>
+      <span class="settings-label">Ticker Text: </span>
+
+      <div style="display:inline-block;">
+        <div>
+          <input type="text" v-model="text"/>
+        </div>
+
+        <div>
+          <input type="radio" id="ticker-font0" name="ticker-font" value="0" v-model="fontIndex">
+          <label for="ticker-font0" id="gameboy" class="radio-label">Game Boy</label>
+
+          <input type="radio" id="ticker-font1" name="ticker-font" value="1" v-model="fontIndex">
+          <label for="ticker-font1" id="pokemon" class="radio-label">POKEMON</label>
+
+          <input type="radio" id="ticker-font2" name="ticker-font" value="2" v-model="fontIndex">
+          <label for="ticker-font2" id="nokia" class="radio-label">Nokia</label>
+
+          <input type="radio" id="ticker-font3" name="ticker-font" value="3" v-model="fontIndex">
+          <label for="ticker-font3" id="gamer" class="radio-label">Gamer</label>
+        </div>
+
+        <div>
+          <canvas id="ticker-canvas" ref="canvas" height="16"></canvas>
+        </div>
+      </div>
+    </div>
+  `
+});
+
 let app = new Vue({
   el: '#app',
   data: {
@@ -9,8 +85,7 @@ let app = new Vue({
     romData: '',
     fontIndex: 0,
     disableCGB: false,
-    forceDMG: false,
-    tickerText: new TickerText("Created with GBNP, orangeglo.github.io/gbnp/")
+    forceDMG: false
   },
   created: function() {
     this.processor.menu = this.menu;
@@ -46,7 +121,8 @@ let app = new Vue({
       for (let i = 0; i < files.length; i++) {
         let fileReader = new FileReader();
         fileReader.onload = () => {
-          this.roms.push(new ROM(fileReader.result, this.fontIndex));
+          const rom = new ROM(fileReader.result, this.fontIndex)
+          if (!rom.bad) { this.roms.push(rom); }
         }
         fileReader.readAsArrayBuffer(files[i]);
       }
@@ -93,28 +169,4 @@ let app = new Vue({
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
     triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); }
   }
-});
-
-Vue.component('bitmap-preview', {
-  props: ['data'],
-  mounted: function() {
-    this.renderCanvas();
-  },
-  watch: {
-    data: function() {
-      this.renderCanvas();
-    }
-  },
-  methods: {
-    renderCanvas: function() {
-      let canvas = this.$refs.canvas;
-      const ctx = canvas.getContext('2d');
-      ctx.putImageData(new ImageData(this.data, 128, 8), 0, 0);
-      ctx.imageSmoothingEnabled = false;
-      ctx.scale(2, 2);
-      ctx.drawImage(ctx.canvas, 0, 0);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-  },
-  template: '<canvas width="256" height="16" ref="canvas"></canvas>'
 });

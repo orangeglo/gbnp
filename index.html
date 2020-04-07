@@ -120,6 +120,8 @@
           <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>
           <input id="filename-input" type="text" v-model:value="filename"/>
         </div>
+
+        <ticker-settings :processor="processor"/>
       </section>
 
       <h2>3. Download Files</h2>

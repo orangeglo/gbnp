@@ -146,6 +146,7 @@ tbody tr:nth-child(odd) {
   margin-right: 20px;
   min-width: 190px;
   display: inline-block;
+  vertical-align: top;
 }
 
 .settings-row {

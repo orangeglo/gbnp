@@ -69,16 +69,23 @@ class ROM {
     this.romByte = file.readByte();
     this.ramByte = file.readByte();
 
+    this.updateBitmap(fontIndex);
+
     file.rewind();
     this.arrayBuffer = new ArrayBuffer(this.paddedRomSizeKB() * 1024);
     let paddedFile = new FileSeeker(this.arrayBuffer);
-    paddedFile.writeBytes(file.read(file.size()));
 
-    this.updateBitmap(fontIndex);
+    if (file.size() > this.arrayBuffer.byteLength) {
+      alert('ROM header size is smaller than the file size! Did you load a menu by mistake?')
+      this.bad = true;
+      return;
+    } else {
+      paddedFile.writeBytes(file.read(file.size()));
+    }
 
-    if (!this.valid()) { alert('File is not a valid Game Boy ROM!') }
-    else if (!this.type) { alert('Cartridge type could not be determined!') }
-    else if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!') }
+    if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true;  }
+    else if (!this.type) { alert('Cartridge type could not be determined!'); this.bad = true;  }
+    else if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!'); this.bad = true;  }
   }
 
   valid() {
@@ -189,7 +196,7 @@ class Processor {
     this.menu = null;
     this.disableCGB = false;
     this.forceDMG = false;
-    this.tickerText = tickerText
+    this.tickerBitmap = [];
   }
 
   romTotalKB() {
@@ -315,7 +322,7 @@ class Processor {
     romFile.writeByteUntil(0x00, 0x19140); // overwrite existing data
 
     romFile.seek(0x18040);
-    romFile.writeBytes(Array.from(this.tickerText.bitmapBuffer));
+    romFile.writeBytes(Array.from(this.tickerBitmap));
 
     // let testBuffer = [];
     // for (let i = 0; i < this.roms[0].bitmapBuffer.length; i++){
@@ -411,25 +418,21 @@ class Processor {
 }
 
 class TickerText {
-  constructor(text) {
+  constructor(text, fontIndex, canvas) {
     this.text = text;
-    this.updateBitmap(text)
+    this.fontIndex = fontIndex;
+    this.canvas = canvas;
   }
 
-  setText(text) {
-    this.text = text;
-    this.updateBitmap(text)
-  }
-
-  updateBitmap(text) {
+  generate() {
     let buffer = [];
+    const canvas = this.canvas;
+    const text = this.text;
+    const font =  'normal 24px Gamer';
 
-    // const canvas = document.createElement("canvas");
-    const canvas = document.getElementById("scratch-canvas");
-    canvas.height = 16;
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-    ctx.font = 'normal 10px sans-serif';
+    ctx.font = font;
     let width = Math.ceil(ctx.measureText(text).width)
     for (let i = 0; i < 16; i++) {
       if ((width % 16) == 0) { break; }
@@ -437,9 +440,8 @@ class TickerText {
     }
     width = Math.max(64, width);
 
-
     canvas.width = width;
-    ctx.font = 'normal 10px sans-serif';
+    ctx.font = font;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'white';
@@ -459,11 +461,6 @@ class TickerText {
     }
 
     let outputBuffer = []
-    console.log(imageData.length)
-    console.log(buffer);
-    console.log(canvas.width);
-    console.log(canvas.height);
-    console.log(Math.trunc(canvas.width/4))
     for (let h = 0; h < Math.trunc(canvas.width/4); h+=2) {
       for (let i = h; i < canvas.width * 4; i+=Math.trunc(canvas.width/4)) {
         let a = buffer[i]
@@ -480,7 +477,7 @@ class TickerText {
       }
     }
 
-    this.bitmapBuffer = new Uint8Array(outputBuffer);
+    return outputBuffer;
   }
 }
 
