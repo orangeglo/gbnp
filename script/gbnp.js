@@ -428,12 +428,12 @@ class TickerText {
     let buffer = [];
     const canvas = this.canvas;
     const text = this.text;
-    const font =  'normal 24px Gamer';
+    const font =  FONTS[this.fontIndex].style;
 
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.font = font;
-    let width = Math.ceil(ctx.measureText(text).width)
+    let width = Math.ceil(ctx.measureText(text).width) + 2
     for (let i = 0; i < 16; i++) {
       if ((width % 16) == 0) { break; }
       width++
@@ -444,8 +444,10 @@ class TickerText {
     ctx.font = font;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#888';
+    ctx.fillText(text,3,14);
     ctx.fillStyle = 'white';
-    ctx.fillText(text,1,13);
+    ctx.fillText(text,1,12);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
@@ -453,8 +455,12 @@ class TickerText {
       let byte = 0;
       for (let j = 0; j < 4; j++) {
         let red = imageData[i+j*4];
-        if (red < 127) {
+        if (red < 128) {
           byte = byte | 0b11 << (6 - j*2);
+        } else if (red < 162) {
+          byte = byte | 0b01 << (6 - j*2);
+        } else if (red < 192) {
+          byte = byte | 0b10 << (6 - j*2);
         }
       }
       buffer.push(byte)

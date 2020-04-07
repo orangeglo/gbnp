@@ -104,6 +104,8 @@
           <label for="font3" id="gamer" class="radio-label">Gamer</label>
         </div>
 
+        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
+
         <div class="settings-row">
           <label class="settings-label" id="disableCGB-label" for="disableCGB-input">Disable CGB Palette: </label>
           <input id="disableCGB-input" type="checkbox" v-model:checked="disableCGB"/>
@@ -120,8 +122,6 @@
           <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>
           <input id="filename-input" type="text" v-model:value="filename"/>
         </div>
-
-        <ticker-settings :processor="processor"/>
       </section>
 
       <h2>3. Download Files</h2>
@@ -131,8 +131,6 @@
         <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
       </section>
     </div>
-
-    <canvas id="scratch-canvas"></canvas>
 
     <footer>
       <a href="https://github.com/orangeglo/gbnp">view this project on github</a>

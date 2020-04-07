@@ -19,19 +19,15 @@ Vue.component('bitmap-preview', {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
   },
-  template: '<canvas width="256" height="16" ref="canvas"></canvas>'
+  template: '<canvas style="vertical-align: middle" width="256" height="16" ref="canvas"></canvas>'
 });
 
 Vue.component('ticker-settings', {
-  props: ['processor'],
+  props: ['processor', 'fontsLoaded', 'fontIndex'],
   data: function() {
     return ({
-      fontIndex: 0,
-      text: "Created with GBNP on April 6, 2020"
+      text: "Created with GBNP on " + (new Date).toISOString().slice(0, 10) + "!"
     });
-  },
-  mounted: function() {
-    this.updateBitmap();
   },
   methods: {
     updateBitmap: function() {
@@ -41,32 +37,19 @@ Vue.component('ticker-settings', {
   },
   watch: {
     fontIndex: function() { this.updateBitmap() },
+    fontsLoaded: function () { this.updateBitmap() },
     text: function() { this.updateBitmap() }
   },
   template: `
-    <div>
+    <div class="settings-row">
       <span class="settings-label">Ticker Text: </span>
 
       <div style="display:inline-block;">
         <div>
-          <input type="text" v-model="text"/>
+          <input style="width: 450px;" type="text" v-model="text"/>
         </div>
 
-        <div>
-          <input type="radio" id="ticker-font0" name="ticker-font" value="0" v-model="fontIndex">
-          <label for="ticker-font0" id="gameboy" class="radio-label">Game Boy</label>
-
-          <input type="radio" id="ticker-font1" name="ticker-font" value="1" v-model="fontIndex">
-          <label for="ticker-font1" id="pokemon" class="radio-label">POKEMON</label>
-
-          <input type="radio" id="ticker-font2" name="ticker-font" value="2" v-model="fontIndex">
-          <label for="ticker-font2" id="nokia" class="radio-label">Nokia</label>
-
-          <input type="radio" id="ticker-font3" name="ticker-font" value="3" v-model="fontIndex">
-          <label for="ticker-font3" id="gamer" class="radio-label">Gamer</label>
-        </div>
-
-        <div>
+        <div style="height: 16px; background-color: black">
           <canvas id="ticker-canvas" ref="canvas" height="16"></canvas>
         </div>
       </div>
@@ -85,7 +68,8 @@ let app = new Vue({
     romData: '',
     fontIndex: 0,
     disableCGB: false,
-    forceDMG: false
+    forceDMG: false,
+    fontsLoaded: false
   },
   created: function() {
     this.processor.menu = this.menu;
@@ -170,3 +154,5 @@ let app = new Vue({
     triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); }
   }
 });
+
+document.fonts.ready.then(function() { app.fontsLoaded = true });

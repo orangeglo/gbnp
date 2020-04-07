@@ -66,10 +66,6 @@ button {
   font-weight: bold;
 }
 
-canvas {
-  vertical-align: middle;
-}
-
 button.upload {
   padding: 3px 0;
   color: blue;
