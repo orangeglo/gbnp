@@ -443,7 +443,7 @@ class TickerText {
       let byte = 0;
       for (let j = 0; j < 4; j++) {
         let red = imageData[i+j*4];
-        if (red < 128) {
+        if (red < 100) {
           byte = byte | 0b11 << (6 - j*2);
         } else if (red < 210) {
           byte = byte | 0b01 << (6 - j*2);
