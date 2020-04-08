@@ -49,8 +49,9 @@ Vue.component('ticker-settings', {
           <input style="width: 450px;" type="text" v-model="text"/>
         </div>
 
-        <div style="height: 16px; background-color: black">
-          <canvas id="ticker-canvas" ref="canvas" height="16"></canvas>
+        <div style="height: 17px; background-color: black">
+          <img src="img/ticker_logo.png" style="height: 16px; padding-top: 1px"/>
+          <canvas id="ticker-canvas" ref="canvas" height="16" style="vertical-align: top"></canvas>
         </div>
       </div>
     </div>

@@ -320,19 +320,8 @@ class Processor {
     // ticker text
     romFile.seek(0x18040);
     romFile.writeByteUntil(0x00, 0x19140); // overwrite existing data
-
     romFile.seek(0x18040);
     romFile.writeBytes(Array.from(this.tickerBitmap));
-
-    // let testBuffer = [];
-    // for (let i = 0; i < this.roms[0].bitmapBuffer.length; i++){
-    //   testBuffer.push(~this.roms[0].bitmapBuffer[i])
-    // }
-    // romFile.writeBytes(testBuffer);
-
-    // romFile.writeByteUntil(0xFF, 0x18040 + 64); // blank initial white box
-    // romFile.writeByteUntil(0xF0, 0x1C000); // scrolls for a long time (forever?)
-
 
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
@@ -431,14 +420,13 @@ class TickerText {
     const font =  FONTS[this.fontIndex].style;
 
     const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
     ctx.font = font;
     let width = Math.ceil(ctx.measureText(text).width) + 2
     for (let i = 0; i < 16; i++) {
       if ((width % 16) == 0) { break; }
       width++
     }
-    width = Math.max(64, width);
+    width = Math.min(1024, Math.max(64, width));
 
     canvas.width = width;
     ctx.font = font;
@@ -457,10 +445,8 @@ class TickerText {
         let red = imageData[i+j*4];
         if (red < 128) {
           byte = byte | 0b11 << (6 - j*2);
-        } else if (red < 162) {
+        } else if (red < 210) {
           byte = byte | 0b01 << (6 - j*2);
-        } else if (red < 192) {
-          byte = byte | 0b10 << (6 - j*2);
         }
       }
       buffer.push(byte)
