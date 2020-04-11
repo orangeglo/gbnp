@@ -70,7 +70,8 @@ let app = new Vue({
     fontIndex: 0,
     disableCGB: false,
     forceDMG: false,
-    fontsLoaded: false
+    fontsLoaded: false,
+    cartType: 0
   },
   created: function() {
     this.processor.menu = this.menu;

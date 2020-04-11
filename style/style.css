@@ -180,3 +180,26 @@ noscript {
   font-weight: bold;
   color: red;
 }
+
+.cart-option {
+  display: inline-block;
+  width: 280px;
+  height: 35px;
+  text-align: center;
+  border: 1px solid #CCC;
+  cursor: pointer;
+}
+
+.cart-option * { cursor: pointer; }
+
+.cart-option div {
+  margin-top: 6px;
+}
+
+.cart-option label {
+  vertical-align: middle;
+}
+
+.cart-option.selected {
+  border: 1px solid black;
+}

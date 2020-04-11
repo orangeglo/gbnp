@@ -18,7 +18,18 @@
       Looks like you have JS disabled. This tool needs javascript to function!
     </noscript>
     <div id="app">
-      <h2>1. Add Game ROMs</h2>
+      <h2>1. Select Your Cartridge</h2>
+      <section>
+        <div class="cart-option" v-on:click="$refs.r1.click()" :class="{selected: cartType == 0}"><div>
+          <input v-model="cartType" type="radio" value="0" ref="r1" name="cart-selection" id="cs1"/>
+          <label for="cs1">Nintendo GB Memory Cart</label>
+        </div></div>
+        <div class="cart-option" v-on:click="$refs.r2.click()" :class="{selected: cartType == 1}"><div>
+          <input v-model="cartType" type="radio" value="1" ref="r2" name="cart-selection" id="cs2"/>
+          <label for="cs2">insideGadgets Power Cart</label>
+        </div></div>
+      </section>
+      <h2>2. Add Game ROMs</h2>
       <section>
         <table>
           <thead>
@@ -86,7 +97,7 @@
         </table>
       </section>
 
-      <h2>2. Tweak Settings </h2>
+      <h2>3. Tweak Settings </h2>
       <section>
         <div class="settings-row">
           <span class="settings-label">Menu Font: </span>
@@ -124,7 +135,7 @@
         </div>
       </section>
 
-      <h2>3. Download Files</h2>
+      <h2>4. Download Files</h2>
       <section>
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
         /
