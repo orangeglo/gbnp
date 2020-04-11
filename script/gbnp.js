@@ -13,6 +13,7 @@ const BITMAP_PREVIEW_BYTES = [
   [0x66, 0x66, 0x66, 0xFF], // dark grey
   [0x00, 0x00, 0x00, 0xFF] // black
 ]
+const IG_POWER_CART_HACK = [0x3E, 0x01, 0xEA, 0x00, 0x20, 0xF0, 0xFD, 0x01, 0x00, 0x20, 0x4F, 0x0A, 0xEA, 0x00, 0x60];
 const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
@@ -197,6 +198,7 @@ class Processor {
     this.disableCGB = false;
     this.forceDMG = false;
     this.tickerBitmap = [];
+    this.cartType = 0;
   }
 
   romTotalKB() {
@@ -300,6 +302,12 @@ class Processor {
 
     // copy menu data
     romFile.writeBytes(this.menu.data);
+
+    // apply iG power cart hack
+    if (this.cartType === 1) {
+      romFile.seek(0x130E);
+      romFile.writeBytes(IG_POWER_CART_HACK);
+    }
 
     // apply cgb hack
     if (this.disableCGB) {

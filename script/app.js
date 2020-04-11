@@ -90,7 +90,8 @@ let app = new Vue({
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
     },
     disableCGB: function() { this.processor.disableCGB = this.disableCGB; },
-    forceDMG: function() { this.processor.forceDMG = this.forceDMG; }
+    forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
+    cartType: function() { this.processor.cartType = this.cartType; }
   },
   methods: {
     addMenu: function(e) {
