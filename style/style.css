@@ -140,7 +140,7 @@ tbody tr:nth-child(odd) {
 .settings-label {
   font-weight: bold;
   margin-right: 20px;
-  min-width: 190px;
+  min-width: 160px;
   display: inline-block;
   vertical-align: top;
 }

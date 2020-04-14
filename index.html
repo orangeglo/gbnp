@@ -105,13 +105,13 @@
           <label for="font3" id="gamer" class="radio-label">Gamer</label>
         </div>
 
-        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
-
         <div class="settings-row">
-          <label class="settings-label" id="forceDMG-label" for="forceDMG-input">Force DMG Menu/Music: </label>
+          <label class="settings-label" for="forceDMG-input">Force DMG Menu: </label>
           <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
-          The DMG menu and music will be used on color systems. <a href="img/menu_comparison.png">Comparison here.</a>
+          <label for="forceDMG-input">The DMG menu and music will be used on color systems.</label> <a href="img/menu_comparison.png">Comparison here.</a>
         </div>
+
+        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
 
         <div class="settings-row">
           <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>
