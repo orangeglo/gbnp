@@ -194,7 +194,6 @@ class Processor {
   constructor(roms, tickerText) {
     this.roms = roms;
     this.menu = null;
-    this.disableCGB = false;
     this.forceDMG = false;
     this.tickerBitmap = [];
   }
@@ -300,14 +299,6 @@ class Processor {
 
     // copy menu data
     romFile.writeBytes(this.menu.data);
-
-    // apply cgb hack
-    if (this.disableCGB) {
-      romFile.seek(0x143);
-      romFile.writeByte(0);
-      romFile.seek(0x14D); // fix checksum
-      romFile.writeByte(83);
-    }
 
     // apply dmg menu hack
     if (this.forceDMG) {

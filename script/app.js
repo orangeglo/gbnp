@@ -68,14 +68,12 @@ let app = new Vue({
     mapData: '',
     romData: '',
     fontIndex: 0,
-    disableCGB: false,
     forceDMG: false,
     fontsLoaded: false
   },
   created: function() {
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
-    this.processor.disableCGB = this.disableCGB;
     this.processor.forceDMG = this.forceDMG;
   },
   computed: {
@@ -88,7 +86,6 @@ let app = new Vue({
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
     },
-    disableCGB: function() { this.processor.disableCGB = this.disableCGB; },
     forceDMG: function() { this.processor.forceDMG = this.forceDMG; }
   },
   methods: {

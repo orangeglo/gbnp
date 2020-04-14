@@ -108,15 +108,9 @@
         <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
 
         <div class="settings-row">
-          <label class="settings-label" id="disableCGB-label" for="disableCGB-input">Disable CGB Palette: </label>
-          <input id="disableCGB-input" type="checkbox" v-model:checked="disableCGB"/>
-          The Game Boy will load the menu (and all games) in DMG palette mode.
-        </div>
-
-        <div class="settings-row">
           <label class="settings-label" id="forceDMG-label" for="forceDMG-input">Force DMG Menu/Music: </label>
           <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
-          The more minimal DMG menu and music will be used. <a href="img/menu_comparison.png">Comparison here.</a>
+          The DMG menu and music will be used on color systems. <a href="img/menu_comparison.png">Comparison here.</a>
         </div>
 
         <div class="settings-row">
