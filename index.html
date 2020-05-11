@@ -7,6 +7,7 @@
     <script id="devload" src="script/devload.js"></script>
     <script src="script/gbnp.js"></script>
     <link rel="stylesheet" type="text/css" href="style/style.css" />
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png"/>
   </head>
 
   <body>
@@ -115,19 +116,13 @@
           <label for="font3" id="gamer" class="radio-label">Gamer</label>
         </div>
 
-        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
-
         <div class="settings-row">
-          <label class="settings-label" id="disableCGB-label" for="disableCGB-input">Disable CGB Palette: </label>
-          <input id="disableCGB-input" type="checkbox" v-model:checked="disableCGB"/>
-          The Game Boy will load the menu (and all games) in DMG palette mode.
-        </div>
-
-        <div class="settings-row">
-          <label class="settings-label" id="forceDMG-label" for="forceDMG-input">Force DMG Menu/Music: </label>
+          <label class="settings-label" for="forceDMG-input">Force DMG Menu: </label>
           <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
-          The more minimal DMG menu and music will be used. <a href="img/menu_comparison.png">Comparison here.</a>
+          <label for="forceDMG-input">The DMG menu and music will be used on color systems.</label> <a href="img/menu_comparison.png">Comparison here.</a>
         </div>
+
+        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
 
         <div class="settings-row">
           <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>
