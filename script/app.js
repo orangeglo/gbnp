@@ -76,6 +76,10 @@ let app = new Vue({
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
     this.processor.forceDMG = this.forceDMG;
+
+    if (window.location.search.substr(1).toLowerCase() == 'ig') {
+      this.cartType = 1;
+    }
   },
   computed: {
     downloadEnabled: function() {
