@@ -81,13 +81,15 @@ let app = new Vue({
     downloadEnabled: function() {
       return this.menu.present() && !this.romOverflow;
     },
+    mapEnabled: function() {
+      return this.cartType == 0;
+    },
     romOverflow: function() { return this.processor.romOverflow(); }
   },
   watch: {
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
     },
-    disableCGB: function() { this.processor.disableCGB = this.disableCGB; },
     forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
     cartType: function() { this.processor.cartType = this.cartType; }
   },
@@ -137,8 +139,10 @@ let app = new Vue({
       this.processor.roms = this.roms;
     },
     downloadMapFile: function(e) {
-      if (this.mapData) { URL.revokeObjectURL(this.mapData) }
-      this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
+      if (this.cartType == 0) { // regular power cart only
+        if (this.mapData) { URL.revokeObjectURL(this.mapData) }
+        this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
+      }
     },
     downloadRomFile: function(e) {
       if (this.romData) { URL.revokeObjectURL(this.romData) }

@@ -13,7 +13,6 @@ const BITMAP_PREVIEW_BYTES = [
   [0x66, 0x66, 0x66, 0xFF], // dark grey
   [0x00, 0x00, 0x00, 0xFF] // black
 ]
-const IG_POWER_CART_HACK = [0x3E, 0x01, 0xEA, 0x00, 0x20, 0xF0, 0xFD, 0x01, 0x00, 0x20, 0x4F, 0x0A, 0xEA, 0x00, 0x60];
 const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
@@ -304,26 +303,7 @@ class Processor {
 
     // apply iG power cart hack
     if (this.cartType == 1) {
-      romFile.seek(0x130E); // For CGB+
-      romFile.writeBytes([0xC3, 0x00, 0x1F]); // Jump to 0x1F00
-
-      romFile.seek(0x140F); // For DMG/Pocket
-      romFile.writeBytes([0xC3, 0x00, 0x1F]); // Jump to 0x1F00
-
-
-      // Set rom bank, ram enabled/disabled, 8KB/32KB locked and ram bank
-      romFile.seek(0x1F00);
-      romFile.writeBytes([0x3e, 0x01, 0xea, 0x00, 0x20, // Set 0x2000, 1
-      0xf0, 0xfd, 0x01, 0x00, 0x22, 0x4f, 0x0a, 0xea, 0x00, 0x40, 0x3e, 0x00, 0xea, 0x00, 0x40, // Ram bank set bit 1+. 8KB/32KB locking = bit 0
-      0xf0, 0xfd, 0x01, 0x00, 0x21, 0x4f, 0x0a, 0xea, 0x00, 0x00, // Ram enable/disable
-      0xf0, 0xfd, 0x01, 0x00, 0x20, 0x4f, 0x0a, 0xea, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // Rom bank and restart GB
-
-
-      // Patch out any writes to 0x0000-0x1000
-      romFile.seek(0x0DDF);
-      romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-      romFile.seek(0x0E22);
-      romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+      this.patchRomHeaderForIG(romFile);
     }
 
     // apply dmg menu hack
@@ -348,10 +328,10 @@ class Processor {
       romFile.seek(romFileIndex + i * 512);
       romFile.writeByte(0xFF);
     }
-   
-   
-    let romOffset = 8;
-    let ramOffset = 0;
+
+
+    // used in loop for iG power cart hack   
+    let iGOffsets = { rom: 8, ram: 0 };
 
     for (let i = 0; i < this.roms.length; i++) {
       const rom = this.roms[i];
@@ -381,50 +361,10 @@ class Processor {
       romFile.writeBytes(rom.bitmapBuffer);
 
       romFileIndex += 512
-    }
     
-    // apply iG power cart hack
-    if (this.cartType == 1) {
-      // Set rom bank start
-      romFile.seek(0x2001 + i);
-      if (rom.typeByte >= 1 && rom.typeByte <= 3) {// MBC1 enabled, setting bank 0 = bank 1
-        romFile.writeByte(romOffset | 0x01);
-      }
-      else {
-        romFile.writeByte(romOffset);
-      }
-      romOffset += Math.trunc(rom.paddedRomSizeKB() / 16);
-      
-      
-      // Set ram state
-      romFile.seek(0x2101 + i);
-      if (rom.ramByte > 0) {
-        romFile.writeByte(1); // Ram enabled
-      }
-      else {
-        romFile.writeByte(0); // Ram disabled
-      }
-      
-      // Set ram bank info
-      romFile.seek(0x2201 + i);
-      
-      // Ram offset and if we are 8KB or 32KB locked
-      if (rom.ramByte == 2) { // 8KB
-        romFile.writeByte(ramOffset); // 8KB locked
-      }
-      else if (rom.ramByte == 3) { // 32KB
-        romFile.writeByte(ramOffset | 0x01); // 32KB locked
-      }
-      else {
-        romFile.writeByte(0);
-      }
-      
-      // Increment ram offset after
-      if (rom.ramByte == 2) { // 8KB
-        ramOffset += 2;
-      }
-      else if (rom.ramByte == 3) { // 32KB
-        ramOffset += 8;
+      // apply iG power cart hack
+      if (this.cartType == 1) {
+        this.patchBankInfoForIG(rom, romFile, iGOffsets, i);
       }
     }
 
@@ -435,6 +375,70 @@ class Processor {
     }
 
     return new Uint8Array(romBuffer);
+  }
+
+  patchRomHeaderForIG(romFile) {
+    romFile.seek(0x130E); // For CGB+
+    romFile.writeBytes([0xC3, 0x00, 0x1F]); // Jump to 0x1F00
+    
+    romFile.seek(0x140F); // For DMG/Pocket
+    romFile.writeBytes([0xC3, 0x00, 0x1F]); // Jump to 0x1F00
+       
+    // Set rom bank, ram enabled/disabled, 8KB/32KB locked and ram bank
+    romFile.seek(0x1F00);
+    romFile.writeBytes([0x3e, 0x01, 0xea, 0x00, 0x20, // Set 0x2000, 1
+    0xf0, 0xfd, 0x01, 0x00, 0x22, 0x4f, 0x0a, 0xea, 0x00, 0x40, 0x3e, 0x00, 0xea, 0x00, 0x40, // Ram bank set bit 1+. 8KB/32KB locking = bit 0
+    0xf0, 0xfd, 0x01, 0x00, 0x21, 0x4f, 0x0a, 0xea, 0x00, 0x00, // Ram enable/disable
+    0xf0, 0xfd, 0x01, 0x00, 0x20, 0x4f, 0x0a, 0xea, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // Rom bank and restart GB
+    
+    // Patch out any writes to 0x0000-0x1000
+    romFile.seek(0x0DDF);
+    romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+    romFile.seek(0x0E22);
+    romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+  }
+
+  patchBankInfoForIG(rom, romFile, offsets, i) {
+    // Set rom bank start
+    romFile.seek(0x2001 + i);
+    if (rom.typeByte >= 1 && rom.typeByte <= 3) {// MBC1 enabled, setting bank 0 = bank 1
+      romFile.writeByte(offsets.rom | 0x01);
+    }
+    else {
+      romFile.writeByte(offsets.rom);
+    }
+    offsets.rom += Math.trunc(rom.paddedRomSizeKB() / 16);
+    
+    // Set ram state
+    romFile.seek(0x2101 + i);
+    if (rom.ramByte > 0) {
+      romFile.writeByte(1); // Ram enabled
+    }
+    else {
+      romFile.writeByte(0); // Ram disabled
+    }
+    
+    // Set ram bank info
+    romFile.seek(0x2201 + i);
+    
+    // Ram offset and if we are 8KB or 32KB locked
+    if (rom.ramByte == 2) { // 8KB
+      romFile.writeByte(offsets.ram); // 8KB locked
+    }
+    else if (rom.ramByte == 3) { // 32KB
+      romFile.writeByte(offsets.ram | 0x01); // 32KB locked
+    }
+    else {
+      romFile.writeByte(0);
+    }
+    
+    // Increment ram offset after
+    if (rom.ramByte == 2) { // 8KB
+      offsets.ram += 2;
+    }
+    else if (rom.ramByte == 3) { // 32KB
+      offsets.ram += 8;
+    }
   }
 
   parseMenuData(menuBuffer, fontIndex) {

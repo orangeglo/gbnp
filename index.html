@@ -13,7 +13,7 @@
   <body>
     <h1>GAME BOY Nintendo Power ROM Builder</h1>
     <div class='text-container'>
-      This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>, as well as the <a href="">insideGadgets Power Cart</a>. The menu can have up to seven roms, or a total of 896KB of game data. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
+      This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>, as well as the <a href="https://shop.insidegadgets.com/product/gameboy-1mb-128kb-sram-power-cart-multi-game-and-multi-save/">insideGadgets Power Cart</a>. The menu can have up to seven roms, or a total of 896KB of game data. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
     </div>
     <noscript>
       Looks like you have JS disabled. This tool needs javascript to function!
@@ -134,7 +134,7 @@
       <section>
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
         /
-        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
+        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled && mapEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: (!downloadEnabled || !mapEnabled) }">Download MAP File</a>
       </section>
     </div>
 
