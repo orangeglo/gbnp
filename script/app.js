@@ -68,7 +68,6 @@ let app = new Vue({
     mapData: '',
     romData: '',
     fontIndex: 0,
-    disableCGB: false,
     forceDMG: false,
     fontsLoaded: false,
     cartType: 0
@@ -76,7 +75,6 @@ let app = new Vue({
   created: function() {
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
-    this.processor.disableCGB = this.disableCGB;
     this.processor.forceDMG = this.forceDMG;
   },
   computed: {

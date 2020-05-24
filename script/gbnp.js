@@ -195,7 +195,6 @@ class Processor {
   constructor(roms, tickerText) {
     this.roms = roms;
     this.menu = null;
-    this.disableCGB = false;
     this.forceDMG = false;
     this.tickerBitmap = [];
     this.cartType = 0;
@@ -304,9 +303,27 @@ class Processor {
     romFile.writeBytes(this.menu.data);
 
     // apply iG power cart hack
-    if (this.cartType === 1) {
-      romFile.seek(0x130E);
-      romFile.writeBytes(IG_POWER_CART_HACK);
+    if (this.cartType == 1) {
+      romFile.seek(0x130E); // For CGB+
+      romFile.writeBytes([0xC3, 0x00, 0x1F]); // Jump to 0x1F00
+
+      romFile.seek(0x140F); // For DMG/Pocket
+      romFile.writeBytes([0xC3, 0x00, 0x1F]); // Jump to 0x1F00
+
+
+      // Set rom bank, ram enabled/disabled, 8KB/32KB locked and ram bank
+      romFile.seek(0x1F00);
+      romFile.writeBytes([0x3e, 0x01, 0xea, 0x00, 0x20, // Set 0x2000, 1
+      0xf0, 0xfd, 0x01, 0x00, 0x22, 0x4f, 0x0a, 0xea, 0x00, 0x40, 0x3e, 0x00, 0xea, 0x00, 0x40, // Ram bank set bit 1+. 8KB/32KB locking = bit 0
+      0xf0, 0xfd, 0x01, 0x00, 0x21, 0x4f, 0x0a, 0xea, 0x00, 0x00, // Ram enable/disable
+      0xf0, 0xfd, 0x01, 0x00, 0x20, 0x4f, 0x0a, 0xea, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // Rom bank and restart GB
+
+
+      // Patch out any writes to 0x0000-0x1000
+      romFile.seek(0x0DDF);
+      romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+      romFile.seek(0x0E22);
+      romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
     }
 
     // apply cgb hack
@@ -339,6 +356,10 @@ class Processor {
       romFile.seek(romFileIndex + i * 512);
       romFile.writeByte(0xFF);
     }
+	 
+	 
+	 let romOffset = 8;
+	 let ramOffset = 0;
 
     for (let i = 0; i < this.roms.length; i++) {
       const rom = this.roms[i];
@@ -368,6 +389,50 @@ class Processor {
       romFile.writeBytes(rom.bitmapBuffer);
 
       romFileIndex += 512
+		
+		// apply iG power cart hack
+		if (this.cartType == 1) {
+			// Set rom bank start
+			romFile.seek(0x2001 + i);
+			if (rom.typeByte >= 1 && rom.typeByte <= 3) {// MBC1 enabled, setting bank 0 = bank 1
+				romFile.writeByte(romOffset | 0x01);
+			}
+			else {
+				romFile.writeByte(romOffset);
+			}
+			romOffset += Math.trunc(rom.paddedRomSizeKB() / 16);
+			
+			
+			// Set ram state
+			romFile.seek(0x2101 + i);
+			if (rom.ramByte > 0) {
+			  romFile.writeByte(1); // Ram enabled
+			}
+			else {
+				romFile.writeByte(0); // Ram disabled
+			}
+			
+			// Set ram bank info
+			romFile.seek(0x2201 + i);
+			
+			// Ram offset and if we are 8KB or 32KB locked
+			if (rom.ramByte == 2) { // 8KB
+				romFile.writeByte(ramOffset); // 8KB locked
+			}
+			else if (rom.ramByte == 3) { // 32KB
+				romFile.writeByte(ramOffset | 0x01); // 32KB locked
+			}
+			else {
+				romFile.writeByte(0);
+			}
+			
+			// Increment ram offset after
+			if (rom.ramByte == 2) { // 8KB
+				ramOffset += 2;
+			}
+			else if (rom.ramByte == 3) { // 32KB
+				ramOffset += 8;
+			}
     }
 
     // write the roms
