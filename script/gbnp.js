@@ -326,14 +326,6 @@ class Processor {
       romFile.writeBytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
     }
 
-    // apply cgb hack
-    if (this.disableCGB) {
-      romFile.seek(0x143);
-      romFile.writeByte(0);
-      romFile.seek(0x14D); // fix checksum
-      romFile.writeByte(83);
-    }
-
     // apply dmg menu hack
     if (this.forceDMG) {
       romFile.seek(0x100);
@@ -356,10 +348,10 @@ class Processor {
       romFile.seek(romFileIndex + i * 512);
       romFile.writeByte(0xFF);
     }
-	 
-	 
-	 let romOffset = 8;
-	 let ramOffset = 0;
+   
+   
+    let romOffset = 8;
+    let ramOffset = 0;
 
     for (let i = 0; i < this.roms.length; i++) {
       const rom = this.roms[i];
@@ -389,50 +381,51 @@ class Processor {
       romFile.writeBytes(rom.bitmapBuffer);
 
       romFileIndex += 512
-		
-		// apply iG power cart hack
-		if (this.cartType == 1) {
-			// Set rom bank start
-			romFile.seek(0x2001 + i);
-			if (rom.typeByte >= 1 && rom.typeByte <= 3) {// MBC1 enabled, setting bank 0 = bank 1
-				romFile.writeByte(romOffset | 0x01);
-			}
-			else {
-				romFile.writeByte(romOffset);
-			}
-			romOffset += Math.trunc(rom.paddedRomSizeKB() / 16);
-			
-			
-			// Set ram state
-			romFile.seek(0x2101 + i);
-			if (rom.ramByte > 0) {
-			  romFile.writeByte(1); // Ram enabled
-			}
-			else {
-				romFile.writeByte(0); // Ram disabled
-			}
-			
-			// Set ram bank info
-			romFile.seek(0x2201 + i);
-			
-			// Ram offset and if we are 8KB or 32KB locked
-			if (rom.ramByte == 2) { // 8KB
-				romFile.writeByte(ramOffset); // 8KB locked
-			}
-			else if (rom.ramByte == 3) { // 32KB
-				romFile.writeByte(ramOffset | 0x01); // 32KB locked
-			}
-			else {
-				romFile.writeByte(0);
-			}
-			
-			// Increment ram offset after
-			if (rom.ramByte == 2) { // 8KB
-				ramOffset += 2;
-			}
-			else if (rom.ramByte == 3) { // 32KB
-				ramOffset += 8;
-			}
+    }
+    
+    // apply iG power cart hack
+    if (this.cartType == 1) {
+      // Set rom bank start
+      romFile.seek(0x2001 + i);
+      if (rom.typeByte >= 1 && rom.typeByte <= 3) {// MBC1 enabled, setting bank 0 = bank 1
+        romFile.writeByte(romOffset | 0x01);
+      }
+      else {
+        romFile.writeByte(romOffset);
+      }
+      romOffset += Math.trunc(rom.paddedRomSizeKB() / 16);
+      
+      
+      // Set ram state
+      romFile.seek(0x2101 + i);
+      if (rom.ramByte > 0) {
+        romFile.writeByte(1); // Ram enabled
+      }
+      else {
+        romFile.writeByte(0); // Ram disabled
+      }
+      
+      // Set ram bank info
+      romFile.seek(0x2201 + i);
+      
+      // Ram offset and if we are 8KB or 32KB locked
+      if (rom.ramByte == 2) { // 8KB
+        romFile.writeByte(ramOffset); // 8KB locked
+      }
+      else if (rom.ramByte == 3) { // 32KB
+        romFile.writeByte(ramOffset | 0x01); // 32KB locked
+      }
+      else {
+        romFile.writeByte(0);
+      }
+      
+      // Increment ram offset after
+      if (rom.ramByte == 2) { // 8KB
+        ramOffset += 2;
+      }
+      else if (rom.ramByte == 3) { // 32KB
+        ramOffset += 8;
+      }
     }
 
     // write the roms
