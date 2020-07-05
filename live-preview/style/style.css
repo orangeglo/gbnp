@@ -1,0 +1,16 @@
+.preview {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  border: 2px dotted grey;
+  padding: 10px;
+}
+
+.preview canvas {
+  width: 480px;
+  height: 432px;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}

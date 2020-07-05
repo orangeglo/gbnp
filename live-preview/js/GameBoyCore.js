@@ -4996,10 +4996,10 @@ GameBoyCore.prototype.recomputeDimension = function () {
 	this.offscreenHeight = (!settings[12]) ? 144 : this.canvas.height;
 	this.offscreenRGBCount = this.offscreenWidth * this.offscreenHeight * 4;
 
-	console.log({
-		w: this.canvas.width,
-		h: this.canvas.height
-	})
+	// console.log({
+	// 	w: this.canvas.width,
+	// 	h: this.canvas.height
+	// })
 
 
 }
@@ -5082,7 +5082,7 @@ GameBoyCore.prototype.GyroEvent = function (x, y) {
 	this.lowY = y & 0xFF;
 }
 GameBoyCore.prototype.initSound = function () {
-	console.log("INT SOUND")
+	// console.log("INT SOUND")
 	this.audioResamplerFirstPassFactor = Math.max(Math.min(Math.floor(this.clocksPerSecond / 44100), Math.floor(0xFFFF / 0x1E0)), 1);
 	this.downSampleInputDivider = 0.5 / (this.audioResamplerFirstPassFactor * 0xF0); // Reduced to 0.5 from 1 to half volume.
 	if (settings[0]) {
@@ -5092,7 +5092,7 @@ GameBoyCore.prototype.initSound = function () {
 		this.initAudioBuffer();
 	}
 	else if (this.audioHandle) {
-		console.log("MUTE")
+		// console.log("MUTE")
 		//Mute the audio output, as it has an immediate silencing effect:
 		this.audioHandle.changeVolume(0);
 	}

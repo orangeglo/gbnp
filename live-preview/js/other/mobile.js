@@ -2,7 +2,7 @@ var romPath = "rom/game.gb";
 var mainCanvas = null;
 var soundReady = false;
 
-var cout = console.log.bind(console);
+var cout = function(_, _) {}
 function startGame(blob) {
   var binaryHandle = new FileReader();
   binaryHandle.onload = function() {
@@ -27,11 +27,20 @@ function loadViaXHR() {
   xhr.send();
 }
 
+function loadViaWindow() {
+  startGame(window.romBlob);
+}
+
+function romPreviewInitialize() {
+  windowingInitialize();
+}
+
 function windowingInitialize() {
   cout("windowingInitialize() called.", 0);
   mainCanvas = document.getElementById("mainCanvas");
   window.onunload = autoSave;
-  loadViaXHR();
+  // loadViaXHR();
+  loadViaWindow();
 }
 
 //Wrapper for localStorage getItem, so that data can be retrieved in various types.
@@ -104,4 +113,4 @@ var soundInitTimer = setInterval(function() {
   }
 }, 16);
 
-window.addEventListener("DOMContentLoaded", windowingInitialize);
+// window.addEventListener("DOMContentLoaded", windowingInitialize);

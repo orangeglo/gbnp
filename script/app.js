@@ -38,7 +38,7 @@ Vue.component('ticker-settings', {
   watch: {
     fontIndex: function() { this.updateBitmap() },
     fontsLoaded: function () { this.updateBitmap() },
-    text: function() { this.updateBitmap() }
+    text: function() { this.updateBitmap(); this.$emit('update'); }
   },
   template: `
     <div class="settings-row">
@@ -70,16 +70,17 @@ let app = new Vue({
     fontIndex: 0,
     forceDMG: false,
     fontsLoaded: false,
-    cartType: 0
+    cartType: 0,
+    livePreviewTimeoutHandle: null
   },
   created: function() {
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
     this.processor.forceDMG = this.forceDMG;
 
-    if (window.location.search.substr(1).toLowerCase() == 'ig') {
-      this.cartType = 1;
-    }
+    this.updateLivePreview();
+
+    if (window.location.search.substr(1).toLowerCase() == 'ig') { this.cartType = 1; }
   },
   computed: {
     downloadEnabled: function() {
@@ -93,8 +94,9 @@ let app = new Vue({
   watch: {
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
+      this.updateLivePreview();
     },
-    forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
+    forceDMG: function() { this.processor.forceDMG = this.forceDMG; this.updateLivePreview(); },
     cartType: function() { this.processor.cartType = this.cartType; }
   },
   methods: {
@@ -104,7 +106,7 @@ let app = new Vue({
         this.roms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
       }
       fileReader.readAsArrayBuffer(e.target.files[0]);
-
+      this.updateLivePreview();
       e.target.value = '';
     },
     addROM: function(e) {
@@ -119,28 +121,33 @@ let app = new Vue({
       }
 
       this.processor.roms = this.roms;
+      this.updateLivePreview();
 
       e.target.value = '';
     },
     removeROM: function(index) {
       this.roms.splice(index, 1);
       this.processor.roms = this.roms;
+      this.updateLivePreview();
     },
     removeAllRoms: function() {
       this.roms = [];
       this.processor.roms = this.roms;
+      this.updateLivePreview();
     },
     moveUp: function(index) {
       let rom = this.roms[index];
       this.roms.splice(index, 1);
       this.roms.splice(index - 1, 0, rom);
       this.processor.roms = this.roms;
+      this.updateLivePreview();
     },
     moveDown: function(index) {
       let rom = this.roms[index];
       this.roms.splice(index, 1);
       this.roms.splice(index + 1, 0, rom);
       this.processor.roms = this.roms;
+      this.updateLivePreview();
     },
     downloadMapFile: function(e) {
       if (this.cartType == 0) { // regular power cart only
@@ -156,11 +163,19 @@ let app = new Vue({
       if (rom.bitmapTimeoutHandle) { clearTimeout(rom.bitmapTimeoutHandle); }
       rom.bitmapTimeoutHandle = setTimeout(() => {
         rom.updateMenuText(val, this.fontIndex);
+        this.updateLivePreview();
       }, 500);
     },
     stopPropagation: function(e) { e.stopImmediatePropagation(); },
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
-    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); }
+    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
+    updateLivePreview: function() {
+      if (this.livePreviewTimeoutHandle) { clearTimeout(this.livePreviewTimeoutHandle) }
+      this.livePreviewTimeoutHandle = setTimeout(() => {
+        this.processor.romData();
+        romPreviewInitialize();
+      }, 500);
+    }
   }
 });
 

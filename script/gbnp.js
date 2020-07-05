@@ -374,6 +374,9 @@ class Processor {
       romFile.writeBytes(new Uint8Array(this.roms[i].arrayBuffer));
     }
 
+    // toss blob in window for live-preview
+    window.romBlob = new Blob([romBuffer])
+
     return new Uint8Array(romBuffer);
   }
 

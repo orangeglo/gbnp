@@ -7,6 +7,7 @@
     <script id="devload" src="script/devload.js"></script>
     <script src="script/gbnp.js"></script>
     <link rel="stylesheet" type="text/css" href="style/style.css" />
+    <link rel="stylesheet" type="text/css" href="live-preview/style/style.css" />
     <link rel="shortcut icon" type="image/png" href="img/favicon.png"/>
   </head>
 
@@ -122,7 +123,7 @@
           <label for="forceDMG-input">The DMG menu and music will be used on color systems.</label> <a href="img/menu_comparison.png">Comparison here.</a>
         </div>
 
-        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
+        <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded" @update="updateLivePreview()"></ticker-settings>
 
         <div class="settings-row">
           <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>
@@ -136,6 +137,16 @@
         /
         <a class='download-link' :download="filename + '.map'" :href="downloadEnabled && mapEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: (!downloadEnabled || !mapEnabled) }">Download MAP File</a>
       </section>
+
+      <div class="preview">
+        <canvas id="mainCanvas">No Canvas Support</canvas>
+        <div>
+          <input id="preview-mute" type="checkbox" />
+          <label for="preview-mute">Mute</label>
+          <input id="preview-color" type="checkbox" />
+          <label for="preview-color">Color</label> 
+        </div>
+      </div>
     </div>
 
     <footer>
@@ -143,6 +154,13 @@
       -
       by orangeglo (orangeglo#6197 on Discord)
     </footer>
+
+    <script src="live-preview/js/other/mobile.js"></script>
+    <script src="live-preview/js/other/swfobject.js"></script>
+    <script src="live-preview/js/other/resampler.js"></script>
+    <script src="live-preview/js/other/XAudioServer.js"></script>
+    <script src="live-preview/js/GameBoyCore.js"></script>
+    <script src="live-preview/js/GameBoyIO.js"></script>  
 
     <script src="script/app.js"></script>
   </body>
