@@ -11,7 +11,7 @@
   </head>
 
   <body>
-    <h1>GAME BOY Nintendo Power ROM Builder</h1>
+    <h1><img src="img/gbnp.png" alt="GBNP logo" title="GAME BOY Nintendo Power ROM Builder" width="250"/></h1>
     <div class='text-container'>
       This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>, as well as the <a href="https://shop.insidegadgets.com/product/gameboy-1mb-128kb-sram-power-cart-multi-game-and-multi-save/">insideGadgets Power Cart</a>. The menu can have up to seven roms, or a total of 896KB of game data. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
     </div>
@@ -19,18 +19,7 @@
       Looks like you have JS disabled. This tool needs javascript to function!
     </noscript>
     <div id="app">
-      <h2>1. Select Your Cartridge</h2>
-      <section>
-        <div class="cart-option" v-on:click="$refs.r1.click()" :class="{selected: cartType == 0}"><div>
-          <input v-model="cartType" type="radio" value="0" ref="r1" name="cart-selection" id="cs1"/>
-          <label for="cs1">Nintendo GB Memory Cart</label>
-        </div></div>
-        <div class="cart-option" v-on:click="$refs.r2.click()" :class="{selected: cartType == 1}"><div>
-          <input v-model="cartType" type="radio" value="1" ref="r2" name="cart-selection" id="cs2"/>
-          <label for="cs2">insideGadgets Power Cart</label>
-        </div></div>
-      </section>
-      <h2>2. Add Game ROMs</h2>
+      <h2>1. Add Game ROMs</h2>
       <section>
         <table>
           <thead>
@@ -79,7 +68,7 @@
               </td>
               <td>
                 <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
-                  <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Load From Previous</label>
+                  <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Add From GBNP ROM</label>
                 </button>
                 <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
               </td>
@@ -98,8 +87,16 @@
         </table>
       </section>
 
-      <h2>3. Tweak Settings </h2>
+      <h2>2. Tweak Settings </h2>
       <section>
+        <div class="settings-row">
+          <span class="settings-label">Cartridge Type: </span>
+          <select v-model="cartType">
+            <option v-bind:value="0">Nintendo GB Memory Cart</option>
+            <option v-bind:value="1">insideGadgets Power Cart</option>
+          </select>
+        </div>
+
         <div class="settings-row">
           <span class="settings-label">Menu Font: </span>
 
@@ -130,11 +127,11 @@
         </div>
       </section>
 
-      <h2>4. Download Files</h2>
+      <h2>3. Download Files</h2>
       <section>
-        <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
-        /
-        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled && mapEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: (!downloadEnabled || !mapEnabled) }">Download MAP File</a>
+        <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download ROM File ({{filename}}.gb)</a>
+        <br>
+        <a class='download-link' v-if="mapEnabled" :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File ({{filename}}.map)</a>
       </section>
     </div>
 
