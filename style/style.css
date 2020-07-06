@@ -88,7 +88,7 @@ button[disabled='disabled'] {
 }
 
 .text-container {
-  width: 850px;
+  max-width: 850px;
   margin-bottom:25px;
 }
 
@@ -183,7 +183,7 @@ noscript {
 
 .drag-target {
   height: 70px;
-  width: 945px;
+  max-width: 945px;
   padding: 20px;
   border: 2px dashed grey;
   display: flex;
