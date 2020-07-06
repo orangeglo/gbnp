@@ -107,8 +107,8 @@ let app = new Vue({
 
       e.target.value = '';
     },
-    addROM: function(e) {
-      const files = e.target.files;
+    addROM: function(e, f) {
+      const files = f || e.target.files;
       for (let i = 0; i < files.length; i++) {
         let fileReader = new FileReader();
         fileReader.onload = () => {
@@ -120,7 +120,7 @@ let app = new Vue({
 
       this.processor.roms = this.roms;
 
-      e.target.value = '';
+      if (e) { e.target.value = ''; }
     },
     removeROM: function(index) {
       this.roms.splice(index, 1);
@@ -160,7 +160,12 @@ let app = new Vue({
     },
     stopPropagation: function(e) { e.stopImmediatePropagation(); },
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
-    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); }
+    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
+    preventDefault: function(e) { e.preventDefault(); },
+    dropFile: function(e) {
+      this.addROM(null, e.dataTransfer.files);
+      e.preventDefault();
+    }
   }
 });
 

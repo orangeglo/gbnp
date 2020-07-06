@@ -28,11 +28,11 @@
     <div id="app">
       <h2>1. Add Game ROMs</h2>
       <section>
-        <table>
+        <table v-if="roms.length > 0">
           <thead>
             <tr>
               <th>       
-                <button v-on:click="removeAllRoms" class="remove-all" :disabled="roms.length == 0" type="button" >
+                <button v-on:click="removeAllRoms" class="remove-all" :disabled="roms.length === 0" type="button" >
                   <label>Remove All</label>
                 </button>
               </th>
@@ -49,8 +49,8 @@
             <tr v-for="(rom, index) in roms" v-bind:key="index">
               <td>
                 <button id="remove-rom" v-on:click="removeROM(index)" type="button">✗</button>
-                <button :disabled="index == 0" v-on:click="moveUp(index)" type="button">↑</button>
-                <button :disabled="index == (roms.length - 1)" v-on:click="moveDown(index)" type="button">↓</button>
+                <button :disabled="index === 0" v-on:click="moveUp(index)" type="button">↑</button>
+                <button :disabled="index === (roms.length - 1)" v-on:click="moveDown(index)" type="button">↓</button>
               </td>
               <td>{{ rom.title }}</td>
               <td>{{ rom.type }}</td>
@@ -92,6 +92,24 @@
             </tr>
           </tfoot>
         </table>
+
+        <div class="drag-target" v-if="roms.length === 0" v-on:dragover="preventDefault" v-on:drop="dropFile"
+          v-on:dragenter="$event.target.classList.add('over')" v-on:dragleave="$event.target.classList.remove('over')"
+        >
+          <div>Drag and drop one or more ROMs to get started!</div>
+          <div style="color: grey">- or -</div>
+          <div>
+            <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.present() || romOverflow" type="button">
+              <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Games</label>
+            </button>
+            <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.present() || romOverflow" accept=".gb,.gbc" multiple>
+
+            <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
+              <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Add From GBNP ROM</label>
+            </button>
+            <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
+          </div>
+        </div>
       </section>
 
       <h2>2. Tweak Settings </h2>

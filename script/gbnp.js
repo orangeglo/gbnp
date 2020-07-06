@@ -76,7 +76,7 @@ class ROM {
     let paddedFile = new FileSeeker(this.arrayBuffer);
 
     if (file.size() > this.arrayBuffer.byteLength) {
-      alert('ROM header size is smaller than the file size! Did you load a menu by mistake?')
+      alert(`Error with ${this.title}!\nROM header size is smaller than the file size! Did you load a menu by mistake?`)
       this.bad = true;
       return;
     } else {
@@ -84,8 +84,8 @@ class ROM {
     }
 
     if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true;  }
-    else if (!this.type) { alert('Cartridge type could not be determined!'); this.bad = true;  }
-    else if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!'); this.bad = true;  }
+    else if (!this.type) { alert(`Error with ${this.title}!\nCartridge type could not be determined!`); this.bad = true;  }
+    else if (this.ramSizeKB() > 32) { alert(`Error with ${this.title}!\nGame requires more than 32 KB of RAM!`); this.bad = true;  }
   }
 
   valid() {
