@@ -164,6 +164,7 @@ let app = new Vue({
     preventDefault: function(e) { e.preventDefault(); },
     dropFile: function(e) {
       this.addROM(null, e.dataTransfer.files);
+      e.target.classList.remove('over')
       e.preventDefault();
     }
   }
