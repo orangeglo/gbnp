@@ -87,6 +87,7 @@
               </td>
               <td :class="{ overflow: romOverflow }">
                 <span v-if="romOverflow">Limit is 7 blocks</span>
+                <span v-if="!romOverflow"><blocks :used="processor.romUsedKB() / 128" /></span>
               </td>
               <td></td>
             </tr>
