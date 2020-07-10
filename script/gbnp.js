@@ -12,13 +12,14 @@ const BITMAP_PREVIEW_BYTES = [
   [0xBB, 0xBB, 0xBB, 0xFF], // light grey
   [0x66, 0x66, 0x66, 0xFF], // dark grey
   [0x00, 0x00, 0x00, 0xFF] // black
-]
+];
 const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
   { style: 'normal 16px Gamer', y: 7 }
-]
+];
+const MENU_TITLE_CHECK = 'NP M-MENU';
 
 class Menu {
   constructor() {
@@ -76,7 +77,9 @@ class ROM {
     let paddedFile = new FileSeeker(this.arrayBuffer);
 
     if (file.size() > this.arrayBuffer.byteLength) {
-      alert(`Error with ${this.title}!\nROM header size is smaller than the file size! Did you load a menu by mistake?`)
+      if (!this.isMenu()) {
+        alert(`Error with ${this.title}!\nROM header size is smaller than the file size!`);
+      }
       this.bad = true;
       return;
     } else {
@@ -111,6 +114,10 @@ class ROM {
 
   ramSizeKB() {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
+  }
+
+  isMenu() {
+    return this.title.includes(MENU_TITLE_CHECK);
   }
 
   updateMenuText(text, fontIndex) {
@@ -442,8 +449,15 @@ class Processor {
   }
 
   parseMenuData(menuBuffer, fontIndex) {
-    this.roms = [];
+    const roms = [];
     const menuFile = new FileSeeker(menuBuffer);
+
+    menuFile.seek(0x134);
+    const title = String.fromCharCode(...menuFile.read(0xF)).replace(/\0/g, '');
+    if (!title.includes(MENU_TITLE_CHECK)) {
+      alert(`${title} does not appear to be a menu ROM!\nDid you select a regular ROM by mistake?`);
+      return [];
+    }
 
     let romSizes = [];
     for (let i = 0; i < 7; i++) {
@@ -462,17 +476,17 @@ class Processor {
         for (let i = 0; i < romSizes.length; i++) {
           const romData = menuFile.read(romSizes[i] * 128 * 1024);
           const romBuffer = (new Uint8Array(romData)).buffer;
-          this.roms.push(new ROM(romBuffer, fontIndex))
+          roms.push(new ROM(romBuffer, fontIndex))
         }
       } catch(e) {
         console.log(e)
-        alert("Failed to parse roms!");
+        alert("Failed to parse roms from menu file!");
       }
     } else {
-      alert("No roms detected!")
+      alert("No roms detected in menu file!")
     }
 
-    return this.roms;
+    return roms;
   }
 }
 

@@ -101,7 +101,8 @@ let app = new Vue({
     addMenu: function(e) {
       let fileReader = new FileReader()
       fileReader.onload = () => {
-        this.roms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+        const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+        if (parsedRoms.length > 0) { this.roms = parsedRoms; }
       }
       fileReader.readAsArrayBuffer(e.target.files[0]);
 
@@ -112,8 +113,13 @@ let app = new Vue({
       for (let i = 0; i < files.length; i++) {
         let fileReader = new FileReader();
         fileReader.onload = () => {
-          const rom = new ROM(fileReader.result, this.fontIndex)
-          if (!rom.bad) { this.roms.push(rom); }
+          const rom = new ROM(fileReader.result, this.fontIndex);
+          if (rom.isMenu()) {
+            const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+            parsedRoms.forEach((rom) => this.roms.push(rom));
+          } else if (!rom.bad) {
+            this.roms.push(rom);
+          }
         }
         fileReader.readAsArrayBuffer(files[i]);
       }
@@ -158,15 +164,15 @@ let app = new Vue({
         rom.updateMenuText(val, this.fontIndex);
       }, 500);
     },
-    stopPropagation: function(e) { e.stopImmediatePropagation(); },
-    triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
-    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
-    preventDefault: function(e) { e.preventDefault(); },
     dropFile: function(e) {
       this.addROM(null, e.dataTransfer.files);
       e.target.classList.remove('over')
       e.preventDefault();
-    }
+    },
+    triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
+    triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
+    stopPropagation: function(e) { e.stopImmediatePropagation(); },
+    preventDefault: function(e) { e.preventDefault(); },
   }
 });
 
