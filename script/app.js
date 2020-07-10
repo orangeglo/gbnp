@@ -91,11 +91,12 @@ let app = new Vue({
     romOverflow: function() { return this.processor.romOverflow(); }
   },
   watch: {
+    roms: function() { this.processor.roms = this.roms; },
+    forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
+    cartType: function() { this.processor.cartType = this.cartType; },
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
     },
-    forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
-    cartType: function() { this.processor.cartType = this.cartType; }
   },
   methods: {
     addMenu: function(e) {
@@ -143,14 +144,14 @@ let app = new Vue({
       this.roms.splice(index + 1, 0, rom);
     },
     downloadMapFile: function(e) {
-      this.processor.roms = this.roms; // load roms into processor
+      this.processor.roms = this.roms; // in case they got out of sync
       if (this.cartType == 0) { // regular power cart only
         if (this.mapData) { URL.revokeObjectURL(this.mapData) }
         this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
       }
     },
     downloadRomFile: function(e) {
-      this.processor.roms = this.roms; // load roms into processor
+      this.processor.roms = this.roms; // in case they got out of sync
       if (this.romData) { URL.revokeObjectURL(this.romData) }
       this.romData = URL.createObjectURL(new Blob([this.processor.romData()]));
     },
