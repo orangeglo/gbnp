@@ -124,37 +124,33 @@ let app = new Vue({
         fileReader.readAsArrayBuffer(files[i]);
       }
 
-      this.processor.roms = this.roms;
-
       if (e) { e.target.value = ''; }
     },
     removeROM: function(index) {
       this.roms.splice(index, 1);
-      this.processor.roms = this.roms;
     },
     removeAllRoms: function() {
       this.roms = [];
-      this.processor.roms = this.roms;
     },
     moveUp: function(index) {
       let rom = this.roms[index];
       this.roms.splice(index, 1);
       this.roms.splice(index - 1, 0, rom);
-      this.processor.roms = this.roms;
     },
     moveDown: function(index) {
       let rom = this.roms[index];
       this.roms.splice(index, 1);
       this.roms.splice(index + 1, 0, rom);
-      this.processor.roms = this.roms;
     },
     downloadMapFile: function(e) {
+      this.processor.roms = this.roms; // load roms into processor
       if (this.cartType == 0) { // regular power cart only
         if (this.mapData) { URL.revokeObjectURL(this.mapData) }
         this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
       }
     },
     downloadRomFile: function(e) {
+      this.processor.roms = this.roms; // load roms into processor
       if (this.romData) { URL.revokeObjectURL(this.romData) }
       this.romData = URL.createObjectURL(new Blob([this.processor.romData()]));
     },
