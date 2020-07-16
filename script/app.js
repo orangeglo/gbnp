@@ -22,25 +22,6 @@ Vue.component('bitmap-preview', {
   template: '<canvas style="vertical-align: middle" width="256" height="16" ref="canvas"></canvas>'
 });
 
-Vue.component('blocks', {
-  props: ['used'],
-  computed: {
-    blocksUsedKeys: function () {
-      return [...Array(this.used).keys()].map((v) => `u${v}`);
-    },
-    blocksFreeKeys: function () {
-      return [...Array(7 - this.used).keys()].map((v) => `f${v}`);
-    }
-  },
-  template: `
-    <span class="blocks">
-      <img src="img/free_block.png" v-for="i in blocksFreeKeys" :key="i" />
-      <img src="img/used_block.png" v-for="i in blocksUsedKeys" :key="i" />
-      <img src="img/used_block.png" />
-    </span>
-  `
-})
-
 Vue.component('ticker-settings', {
   props: ['processor', 'fontsLoaded', 'fontIndex'],
   data: function() {

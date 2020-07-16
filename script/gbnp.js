@@ -516,8 +516,9 @@ class TickerText {
     ctx.font = font;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#888';
-    ctx.fillText(text,3,14);
+
+    // ctx.fillStyle = '#888'; // drop shadow
+    // ctx.fillText(text,3,14);
     ctx.fillStyle = 'white';
     ctx.fillText(text,1,12);
 
@@ -527,11 +528,12 @@ class TickerText {
       let byte = 0;
       for (let j = 0; j < 4; j++) {
         let red = imageData[i+j*4];
-        if (red < 100) {
+        if (red < 210) {
           byte = byte | 0b11 << (6 - j*2);
-        } else if (red < 210) {
-          byte = byte | 0b01 << (6 - j*2);
-        }
+        } 
+        // else if (red < 210) {
+        //   byte = byte | 0b01 << (6 - j*2);
+        // }
       }
       buffer.push(byte)
     }
