@@ -116,6 +116,11 @@ class ROM {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
   }
 
+  ramSizeKBForBs() {
+    if (this.typeByte === 0x06) { return 8; }
+    return this.ramSizeKB();
+  }
+
   isMenu() {
     return this.title.includes(MENU_TITLE_CHECK);
   }
@@ -291,7 +296,8 @@ class Processor {
 
       // ram offset
       mapFile.writeByte(Math.trunc(ramOffset / 2));
-      ramOffset += (rom.typeByte == 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
+      // why am I giving 8 kb to every game?
+      ramOffset += (rom.typeByte === 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
     }
 
     // trailer
@@ -352,15 +358,15 @@ class Processor {
       romBase += Math.trunc(rom.paddedRomSizeKB() / 128);
 
       // sram base? (this is zero in the source)
-      romFile.writeByte(0)
+      romFile.writeByte(0);
 
       // rom size (in 128k units)
       romFile.writeByte(Math.trunc(rom.paddedRomSizeKB() / 128));
       romFile.writeByte(0);
 
-      // sram size in 32b units (this is zero in the source)
-      romFile.writeByte(0)
-      romFile.writeByte(0)
+      // sram "block BBBBBB" flags
+      romFile.writeByte(rom.ramSizeKBForBs() > 0 ? 1 : 0); // true if 8 used
+      romFile.writeByte(rom.ramSizeKBForBs() > 8 ? 1 : 0); // true if 32 used
 
       romFile.seek(romFileIndex + 63);
 
