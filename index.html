@@ -13,6 +13,7 @@
 
     <script src="script/vue.min.js"></script>
     <script id="devload" src="script/devload.js"></script>
+    <script src="script/patches.js"></script>
     <script src="script/gbnp.js"></script>
     <link rel="stylesheet" type="text/css" href="style/style.css" />
   </head>
@@ -138,13 +139,23 @@
           <label for="font3" id="gamer" class="radio-label">Gamer</label>
         </div>
 
-        <div class="settings-row">
-          <label class="settings-label" for="forceDMG-input">Force DMG Menu: </label>
-          <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
-          <label for="forceDMG-input">The DMG menu and music will be used on color systems.</label> <a href="img/menu_comparison.png">Comparison here.</a>
-        </div>
-
         <ticker-settings :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
+
+        <div class="settings-row">
+          <label class="settings-label">ROM Hacks: </label>
+          <div class="flex-row">
+            <div class="flex-item">
+              <input id="englishPatch-input" type="checkbox" v-model:checked="englishPatch"/>
+              <label for="englishPatch-input">Translate the menu into English.</label>
+              <!-- <a href="img/menu_comparison.png">Comparison here.</a> -->
+            </div>
+            <div class="flex-item">
+              <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
+              <label for="forceDMG-input">Use the DMG menu and music on color systems.</label>
+              <!-- <a href="img/menu_comparison.png">Comparison here.</a> -->
+            </div>
+          </div>
+        </div>
 
         <div class="settings-row">
           <label class="settings-label" id="filename-label" for="filename-input">Download Filename: </label>

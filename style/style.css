@@ -198,8 +198,11 @@ noscript {
   border-color: #000079;
 }
 
-.blocks img {
-  float: left;
-  height: 17.5px;
-  margin-right: 1px;
+.flex-row {
+  display: inline-flex;
+}
+
+.flex-item {
+  max-width: 400px;
+  margin-right: 20px;
 }

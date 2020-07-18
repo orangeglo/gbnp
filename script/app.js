@@ -69,13 +69,15 @@ let app = new Vue({
     romData: '',
     fontIndex: 0,
     forceDMG: false,
+    englishPatch: false,
+    cartType: 0,
     fontsLoaded: false,
-    cartType: 0
   },
   created: function() {
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
     this.processor.forceDMG = this.forceDMG;
+    this.processor.englishPatch = this.englishPatch;
 
     if (window.location.search.substr(1).toLowerCase() == 'ig') {
       this.cartType = 1;
@@ -94,6 +96,7 @@ let app = new Vue({
     roms: function() { this.processor.roms = this.roms; },
     forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
     cartType: function() { this.processor.cartType = this.cartType; },
+    englishPatch: function() { this.processor.englishPatch = this.englishPatch; },
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
     },

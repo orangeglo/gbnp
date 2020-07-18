@@ -45,10 +45,10 @@ class Menu {
 
   loadMenuDataFromScript() {
     const head = document.getElementsByTagName('head')[0];
-    const devScript = document.createElement('script');
-    devScript.src = 'script/menu.js';
+    const menuScript = document.createElement('script');
+    menuScript.src = 'script/menu.js';
 
-    head.appendChild(devScript);
+    head.appendChild(menuScript);
   }
 }
 
@@ -116,7 +116,7 @@ class ROM {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
   }
 
-  ramSizeKBForBs() {
+  utilizedRamSizeKB() {
     if (this.typeByte === 0x06) { return 8; }
     return this.ramSizeKB();
   }
@@ -209,6 +209,7 @@ class Processor {
     this.forceDMG = false;
     this.tickerBitmap = [];
     this.cartType = 0;
+    this.englishPatch = false;
   }
 
   romTotalKB() {
@@ -296,7 +297,7 @@ class Processor {
 
       // ram offset
       mapFile.writeByte(Math.trunc(ramOffset / 2));
-      // why am I giving 8 kb to every game?
+      // this is the way it was in C# source, don't really understand why everything gets 8
       ramOffset += (rom.typeByte === 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
     }
 
@@ -325,6 +326,12 @@ class Processor {
       romFile.writeByte(0xAF);
       romFile.seek(0x150);
       romFile.writeBytes([0x3C, 0xE0, 0xFE, 0x3D]);
+    }
+
+    // apply english patch
+    if (this.englishPatch && typeof ENGLISH_PATCH_DATA === 'object') {
+      const englishRomPatcher = new Patcher(ENGLISH_PATCH_DATA);
+      englishRomPatcher.apply(romFile);
     }
 
     // ticker text
@@ -365,8 +372,8 @@ class Processor {
       romFile.writeByte(0);
 
       // sram "block BBBBBB" flags
-      romFile.writeByte(rom.ramSizeKBForBs() > 0 ? 1 : 0); // true if 8 used
-      romFile.writeByte(rom.ramSizeKBForBs() > 8 ? 1 : 0); // true if 32 used
+      romFile.writeByte(rom.utilizedRamSizeKB() > 0 ? 1 : 0); // true if 8 used
+      romFile.writeByte(rom.utilizedRamSizeKB() > 8 ? 1 : 0); // true if 32 used
 
       romFile.seek(romFileIndex + 63);
 
@@ -523,8 +530,6 @@ class TickerText {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // ctx.fillStyle = '#888'; // drop shadow
-    // ctx.fillText(text,3,14);
     ctx.fillStyle = 'white';
     ctx.fillText(text,1,12);
 
@@ -537,9 +542,6 @@ class TickerText {
         if (red < 210) {
           byte = byte | 0b11 << (6 - j*2);
         } 
-        // else if (red < 210) {
-        //   byte = byte | 0b01 << (6 - j*2);
-        // }
       }
       buffer.push(byte)
     }
@@ -562,6 +564,19 @@ class TickerText {
     }
 
     return outputBuffer;
+  }
+}
+
+class Patcher {
+  constructor(patchData) {
+    this.patchData = patchData;
+  }
+
+  apply(file) {
+    this.patchData.forEach((patch) => {
+      file.seek(patch.address);
+      file.writeBytes(patch.data);
+    });
   }
 }
 
