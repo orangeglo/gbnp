@@ -1,3 +1,7 @@
+const parseBool = (boolString) => {
+  return boolString.toLowerCase() === 'true';
+};
+
 Vue.component('bitmap-preview', {
   props: ['data'],
   mounted: function() {
@@ -74,6 +78,8 @@ let app = new Vue({
     fontsLoaded: false,
   },
   created: function() {
+    this.loadSettingsFromStorage();
+
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
     this.processor.forceDMG = this.forceDMG;
@@ -94,11 +100,21 @@ let app = new Vue({
   },
   watch: {
     roms: function() { this.processor.roms = this.roms; },
-    forceDMG: function() { this.processor.forceDMG = this.forceDMG; },
-    cartType: function() { this.processor.cartType = this.cartType; },
-    englishPatch: function() { this.processor.englishPatch = this.englishPatch; },
+    forceDMG: function() {
+      this.processor.forceDMG = this.forceDMG;
+      this.writeSettingsToStorage();
+    },
+    cartType: function() {
+      this.processor.cartType = this.cartType;
+      this.writeSettingsToStorage();
+    },
+    englishPatch: function() {
+      this.processor.englishPatch = this.englishPatch;
+      this.writeSettingsToStorage();
+    },
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
+      this.writeSettingsToStorage();
     },
   },
   methods: {
@@ -168,6 +184,23 @@ let app = new Vue({
       this.addROM(null, e.dataTransfer.files);
       e.target.classList.remove('over')
       e.preventDefault();
+    },
+    writeSettingsToStorage: function () {
+      window.localStorage.setItem('fontIndex', this.fontIndex);
+      window.localStorage.setItem('forceDMG', this.forceDMG);
+      window.localStorage.setItem('englishPatch', this.englishPatch);
+      window.localStorage.setItem('cartType', this.cartType);
+    },
+    loadSettingsFromStorage: function() {
+      const fontIndex = window.localStorage.getItem('fontIndex');
+      const forceDMG = window.localStorage.getItem('forceDMG');
+      const englishPatch = window.localStorage.getItem('englishPatch');
+      const cartType = window.localStorage.getItem('cartType');
+
+      if (fontIndex) { this.fontIndex = parseInt(fontIndex); }
+      if (forceDMG) { this.forceDMG = parseBool(forceDMG); }
+      if (englishPatch) { this.englishPatch = parseBool(englishPatch); }
+      if (cartType) { this.cartType = parseInt(cartType); }
     },
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
     triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
