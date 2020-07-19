@@ -9,8 +9,7 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 - Add up to seven games depending on their sizes
 - Four different font options for menu entry
 - Load data from a previously created rom
-- Built in romhack options
-- Works completely offline
+- Built in romhack options, including an english translation patch
 
 ## Credits
 - GB Memory Maker: https://github.com/Infinest/GB-Memory-Binary-Maker
