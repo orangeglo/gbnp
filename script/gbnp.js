@@ -573,10 +573,22 @@ class Patcher {
   }
 
   apply(file) {
+    const originalPosition = file.position;
     this.patchData.forEach((patch) => {
       file.seek(patch.address);
-      file.writeBytes(patch.data);
+      if (patch.rleData) {
+        patch.rleData.forEach((data) => {
+          if (Array.isArray(data)) {
+            for (let i = 0; i < data[1]; i++) { file.writeByte(data[0]); }
+          } else {
+            file.writeByte(data)
+          }
+        })
+      } else {
+        file.writeBytes(patch.data);
+      }
     });
+    file.seek(originalPosition);
   }
 }
 
