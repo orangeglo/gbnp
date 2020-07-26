@@ -99,7 +99,7 @@
         >
           <div>Drag and drop one or more ROMs to get started!</div>
           <div style="color: grey">- or -</div>
-          <div>
+          <div style="padding-left: 26px;">
             <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.present() || romOverflow" type="button">
               <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Games</label>
             </button>
