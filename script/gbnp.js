@@ -86,9 +86,9 @@ class ROM {
       paddedFile.writeBytes(file.read(file.size()));
     }
 
-    if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true;  }
-    else if (!this.type) { alert(`Error with ${this.title}!\nCartridge type could not be determined!`); this.bad = true;  }
-    else if (this.ramSizeKB() > 32) { alert(`Error with ${this.title}!\nGame requires more than 32 KB of RAM!`); this.bad = true;  }
+    if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true; }
+    else if (!this.type) { alert(`Error with ${this.title}!\nCartridge type could not be determined!`); this.bad = true; }
+    else if (this.ramSizeKB() > 32) { alert(`Error with ${this.title}!\nGame requires more than 32 KB of RAM!`); this.bad = true; }
   }
 
   valid() {
@@ -116,9 +116,9 @@ class ROM {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
   }
 
-  utilizedRamSizeKB() {
+  paddedRamSizeKB() {
     if (this.typeByte === 0x06) { return 8; }
-    return this.ramSizeKB();
+    return Math.min(32, this.ramSizeKB());
   }
 
   isMenu() {
@@ -372,8 +372,8 @@ class Processor {
       romFile.writeByte(0);
 
       // sram "block BBBBBB" flags
-      romFile.writeByte(rom.utilizedRamSizeKB() > 0 ? 1 : 0); // true if 8 used
-      romFile.writeByte(rom.utilizedRamSizeKB() > 8 ? 1 : 0); // true if 32 used
+      romFile.writeByte(rom.paddedRamSizeKB() > 0 ? 1 : 0); // true if 8 used
+      romFile.writeByte(rom.paddedRamSizeKB() > 8 ? 1 : 0); // true if 32 used
 
       romFile.seek(romFileIndex + 63);
 
