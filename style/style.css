@@ -54,6 +54,11 @@ p {
   margin-top: 0;
 }
 
+ul {
+  margin: 0;
+  padding-left: 10px;
+}
+
 footer {
   margin-top: 40px;
   font-size: 0.75em;
@@ -204,5 +209,10 @@ noscript {
 
 .flex-item {
   max-width: 400px;
+  margin-right: 20px;
+}
+
+.games-flex-item {
+  min-width: 250px;
   margin-right: 20px;
 }
