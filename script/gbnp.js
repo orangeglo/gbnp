@@ -118,7 +118,7 @@ class ROM {
 
   paddedRamSizeKB() {
     if (this.typeByte === 0x06) { return 8; }
-    return Math.min(32, this.ramSizeKB());
+    return this.ramSizeKB();
   }
 
   isMenu() {
@@ -143,7 +143,12 @@ class ROM {
     const font = FONTS[fontIndex || 0];
     ctx.font = font.style;
     ctx.fillStyle = 'black';
-    ctx.fillText(this.menuText,1,font.y);
+
+    let text = this.menuText;
+    if (fontIndex == 3) {
+      text = text.toUpperCase();
+    }
+    ctx.fillText(text,1,font.y);
     ctx.fillStyle = 'white';
     ctx.fillRect(127, 0, 127, 8);
 
@@ -226,7 +231,7 @@ class Processor {
 
   ramUsedKB() {
     return this.roms.reduce((total, rom) => {
-      return total += rom.ramSizeKB();
+      return total += rom.paddedRamSizeKB();
     }, 0);
   }
 
@@ -513,7 +518,10 @@ class TickerText {
   generate() {
     let buffer = [];
     const canvas = this.canvas;
-    const text = this.text;
+    let text = this.text;
+    if (this.fontIndex == 3) {
+      text = text.toUpperCase();
+    }
     const font =  FONTS[this.fontIndex].style;
 
     const ctx = canvas.getContext('2d');
