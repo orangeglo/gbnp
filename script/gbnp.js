@@ -431,7 +431,7 @@ class Processor {
     
     // Set ram state
     romFile.seek(0x2101 + i);
-    if (rom.ramByte > 0) {
+    if (rom.ramByte > 0 || rom.typeByte == 0x06) { // has ram or MBC2
       romFile.writeByte(1); // Ram enabled
     }
     else {
@@ -442,7 +442,7 @@ class Processor {
     romFile.seek(0x2201 + i);
     
     // Ram offset and if we are 8KB or 32KB locked
-    if (rom.ramByte == 2) { // 8KB
+    if (rom.ramByte == 2 || rom.typeByte == 0x06) { // 8KB or MBC2+RAM
       romFile.writeByte(offsets.ram); // 8KB locked
     }
     else if (rom.ramByte == 3) { // 32KB
@@ -453,7 +453,7 @@ class Processor {
     }
     
     // Increment ram offset after
-    if (rom.ramByte == 2) { // 8KB
+    if (rom.ramByte == 2 || rom.typeByte == 0x06) { // 8KB or MBC2+RAM
       offsets.ram += 2;
     }
     else if (rom.ramByte == 3) { // 32KB
