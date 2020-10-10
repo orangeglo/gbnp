@@ -462,7 +462,7 @@ class Processor {
       offsets.ram += 2;
     }
     else if (rom.ramByte == 3) { // 32KB
-      offsets.ram += 8;
+      offsets.ram += 4;
     }
   }
 
