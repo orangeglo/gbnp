@@ -118,7 +118,7 @@ class ROM {
 
   paddedRamSizeKB() {
     if (this.typeByte === 0x06) { return 8; }
-    return Math.min(32, this.ramSizeKB());
+    return this.ramSizeKB();
   }
 
   isMenu() {
@@ -143,7 +143,12 @@ class ROM {
     const font = FONTS[fontIndex || 0];
     ctx.font = font.style;
     ctx.fillStyle = 'black';
-    ctx.fillText(this.menuText,1,font.y);
+
+    let text = this.menuText;
+    if (fontIndex == 3) {
+      text = text.toUpperCase();
+    }
+    ctx.fillText(text,1,font.y);
     ctx.fillStyle = 'white';
     ctx.fillRect(127, 0, 127, 8);
 
@@ -226,7 +231,7 @@ class Processor {
 
   ramUsedKB() {
     return this.roms.reduce((total, rom) => {
-      return total += rom.ramSizeKB();
+      return total += rom.paddedRamSizeKB();
     }, 0);
   }
 
@@ -431,7 +436,7 @@ class Processor {
     
     // Set ram state
     romFile.seek(0x2101 + i);
-    if (rom.ramByte > 0) {
+    if (rom.ramByte > 0 || rom.typeByte == 0x06) { // has ram or MBC2
       romFile.writeByte(1); // Ram enabled
     }
     else {
@@ -442,7 +447,7 @@ class Processor {
     romFile.seek(0x2201 + i);
     
     // Ram offset and if we are 8KB or 32KB locked
-    if (rom.ramByte == 2) { // 8KB
+    if (rom.ramByte == 2 || rom.typeByte == 0x06) { // 8KB or MBC2+RAM
       romFile.writeByte(offsets.ram); // 8KB locked
     }
     else if (rom.ramByte == 3) { // 32KB
@@ -453,11 +458,11 @@ class Processor {
     }
     
     // Increment ram offset after
-    if (rom.ramByte == 2) { // 8KB
+    if (rom.ramByte == 2 || rom.typeByte == 0x06) { // 8KB or MBC2+RAM
       offsets.ram += 2;
     }
     else if (rom.ramByte == 3) { // 32KB
-      offsets.ram += 8;
+      offsets.ram += 4;
     }
   }
 
@@ -513,7 +518,10 @@ class TickerText {
   generate() {
     let buffer = [];
     const canvas = this.canvas;
-    const text = this.text;
+    let text = this.text;
+    if (this.fontIndex == 3) {
+      text = text.toUpperCase();
+    }
     const font =  FONTS[this.fontIndex].style;
 
     const ctx = canvas.getContext('2d');
