@@ -84,11 +84,11 @@
               <td></td>
               <td>{{ processor.romTotalKB() + 'k' }}</td>
               <td>{{ processor.ramUsedKB() + 'k' }}</td>
-              <td :class="{ overflow: romOverflow }">
+              <td :class="overflowClassMsg.class">
                 {{ processor.romUsedKB() / 128 + ' (' + processor.romUsedKB() + 'k)'}}
               </td>
-              <td :class="{ overflow: romOverflow }">
-                <span v-if="romOverflow">Limit is 7 blocks</span>
+              <td :class="overflowClassMsg.class">
+                <span v-if="overflowClassMsg.msg">{{overflowClassMsg.msg}}</span>
               </td>
               <td></td>
             </tr>
@@ -169,6 +169,13 @@
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download ROM File ({{filename}}.gb)</a>
         <br>
         <a class='download-link' v-if="mapEnabled" :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File ({{filename}}.map)</a>
+
+        <div v-if="singleRomMapEnabled" class="single-rom-download">
+          <div>If you want to flash {{singleRomFilename}} without the menu, you can use this MAP file to configure the cart to work with your ROM.</div>
+          <a class='download-link' :download="singleRomFilename + '.map'" :href="singleRomMapData" type="application/octet-stream" v-on:click="downloadSingleRomMapFile">
+            Download Single Game MAP File ({{singleRomFilename}}.map)
+          </a>
+        </div>
       </section>
     </div>
 

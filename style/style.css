@@ -129,6 +129,10 @@ td.overflow {
   background-color: red;
 }
 
+td.single-rom {
+  background-color: orange;
+}
+
 thead tr {
   border-bottom: 1px solid #ddd;
 }
@@ -214,4 +218,8 @@ noscript {
 .games-flex-item {
   min-width: 250px;
   margin-right: 20px;
+}
+
+.single-rom-download {
+  margin-top: 1.5rem;
 }

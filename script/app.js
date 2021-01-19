@@ -71,6 +71,7 @@ let app = new Vue({
     filename: 'GBNP',
     mapData: '',
     romData: '',
+    singleRomMapData: '',
     fontIndex: 0,
     forceDMG: false,
     englishPatch: false,
@@ -96,7 +97,23 @@ let app = new Vue({
     mapEnabled: function() {
       return this.cartType == 0;
     },
-    romOverflow: function() { return this.processor.romOverflow(); }
+    romOverflow: function() { return this.processor.romOverflow(); },
+    overflowClassMsg: function() {
+      if (this.processor.roms.length === 1 && this.processor.roms[0].paddedRomSizeKB() === 1024) {
+        return { class: 'single-rom', msg: "Game only (no menu)" };
+      } else if (this.romOverflow) {
+        return { class: 'overflow', msg: "Limit is 7 blocks" };
+      }
+      return { class: null, msg: null };
+    },
+    singleRomMapEnabled: function() {
+      return this.mapEnabled
+        && this.processor.roms.length === 1
+        && this.processor.roms[0].paddedRomSizeKB() <= 1024;
+    },
+    singleRomFilename: function() {
+      return this.processor.roms[0] ? this.processor.roms[0].title : '';
+    }
   },
   watch: {
     roms: function() { this.processor.roms = this.roms; },
@@ -167,6 +184,13 @@ let app = new Vue({
       if (this.cartType == 0) { // regular power cart only
         if (this.mapData) { URL.revokeObjectURL(this.mapData) }
         this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
+      }
+    },
+    downloadSingleRomMapFile: function(e) {
+      this.processor.roms = this.roms; // in case they got out of sync
+      if (this.cartType == 0) { // regular power cart only
+        if (this.singleRomMapData) { URL.revokeObjectURL(this.singleRomMapData) }
+        this.singleRomMapData = URL.createObjectURL(new Blob([this.processor.mapData(true)]));
       }
     },
     downloadRomFile: function(e) {
