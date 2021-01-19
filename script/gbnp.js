@@ -239,17 +239,20 @@ class Processor {
     return (this.romUsedKB() > 896);
   }
 
-  mapData() {
+  mapData(singleRom = false) {
     const mapBuffer = new ArrayBuffer(128);
     const mapFile = new FileSeeker(mapBuffer);
 
-    // write mbc type, rom size, and ram size for menu
-    mapFile.writeBytes([0xA8, 0, 0]);
-
-    // write mbc type, rom size, and ram size for each rom
-    let romOffset = 128;
+    let romOffset = 0;
     let ramOffset = 0;
 
+    if (!singleRom) {
+      // write mbc type, rom size, and ram size for menu
+      mapFile.writeBytes([0xA8, 0, 0]);
+      romOffset += 128;
+    }
+
+    // write mbc type, rom size, and ram size for each rom
     for (let i = 0; i < this.roms.length; i++) {
       let rom = this.roms[i];
       let bits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // 16
