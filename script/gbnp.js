@@ -12,13 +12,14 @@ const BITMAP_PREVIEW_BYTES = [
   [0xBB, 0xBB, 0xBB, 0xFF], // light grey
   [0x66, 0x66, 0x66, 0xFF], // dark grey
   [0x00, 0x00, 0x00, 0xFF] // black
-]
+];
 const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
   { style: 'normal 16px Gamer', y: 7 }
-]
+];
+const MENU_TITLE_CHECK = 'NP M-MENU';
 
 class Menu {
   constructor() {
@@ -44,10 +45,10 @@ class Menu {
 
   loadMenuDataFromScript() {
     const head = document.getElementsByTagName('head')[0];
-    const devScript = document.createElement('script');
-    devScript.src = 'script/menu.js';
+    const menuScript = document.createElement('script');
+    menuScript.src = 'script/menu.js';
 
-    head.appendChild(devScript);
+    head.appendChild(menuScript);
   }
 }
 
@@ -76,16 +77,18 @@ class ROM {
     let paddedFile = new FileSeeker(this.arrayBuffer);
 
     if (file.size() > this.arrayBuffer.byteLength) {
-      alert('ROM header size is smaller than the file size! Did you load a menu by mistake?')
+      if (!this.isMenu()) {
+        alert(`Error with ${this.title}!\nROM header size is smaller than the file size!`);
+      }
       this.bad = true;
       return;
     } else {
       paddedFile.writeBytes(file.read(file.size()));
     }
 
-    if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true;  }
-    else if (!this.type) { alert('Cartridge type could not be determined!'); this.bad = true;  }
-    else if (this.ramSizeKB() > 32) { alert('Game requires more than 32 KB of RAM!'); this.bad = true;  }
+    if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true; }
+    else if (!this.type) { alert(`Error with ${this.title}!\nCartridge type could not be determined!`); this.bad = true; }
+    else if (this.ramSizeKB() > 32) { alert(`Error with ${this.title}!\nGame requires more than 32 KB of RAM!`); this.bad = true; }
   }
 
   valid() {
@@ -113,6 +116,15 @@ class ROM {
     return Math.trunc(Math.pow(4, this.ramByte - 1)) * 2;
   }
 
+  paddedRamSizeKB() {
+    if (this.typeByte === 0x06) { return 8; }
+    return this.ramSizeKB();
+  }
+
+  isMenu() {
+    return this.title.includes(MENU_TITLE_CHECK);
+  }
+
   updateMenuText(text, fontIndex) {
     this.menuText = text;
     this.updateBitmap(fontIndex);
@@ -131,7 +143,12 @@ class ROM {
     const font = FONTS[fontIndex || 0];
     ctx.font = font.style;
     ctx.fillStyle = 'black';
-    ctx.fillText(this.menuText,1,font.y);
+
+    let text = this.menuText;
+    if (fontIndex == 3) {
+      text = text.toUpperCase();
+    }
+    ctx.fillText(text,1,font.y);
     ctx.fillStyle = 'white';
     ctx.fillRect(127, 0, 127, 8);
 
@@ -197,6 +214,7 @@ class Processor {
     this.forceDMG = false;
     this.tickerBitmap = [];
     this.cartType = 0;
+    this.englishPatch = false;
   }
 
   romTotalKB() {
@@ -213,7 +231,7 @@ class Processor {
 
   ramUsedKB() {
     return this.roms.reduce((total, rom) => {
-      return total += rom.ramSizeKB();
+      return total += rom.paddedRamSizeKB();
     }, 0);
   }
 
@@ -284,7 +302,8 @@ class Processor {
 
       // ram offset
       mapFile.writeByte(Math.trunc(ramOffset / 2));
-      ramOffset += (rom.typeByte == 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
+      // this is the way it was in C# source, don't really understand why everything gets 8
+      ramOffset += (rom.typeByte === 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
     }
 
     // trailer
@@ -312,6 +331,12 @@ class Processor {
       romFile.writeByte(0xAF);
       romFile.seek(0x150);
       romFile.writeBytes([0x3C, 0xE0, 0xFE, 0x3D]);
+    }
+
+    // apply english patch
+    if (this.englishPatch && typeof ENGLISH_PATCH_DATA === 'object') {
+      const englishRomPatcher = new Patcher(ENGLISH_PATCH_DATA);
+      englishRomPatcher.apply(romFile);
     }
 
     // ticker text
@@ -345,15 +370,15 @@ class Processor {
       romBase += Math.trunc(rom.paddedRomSizeKB() / 128);
 
       // sram base? (this is zero in the source)
-      romFile.writeByte(0)
+      romFile.writeByte(0);
 
       // rom size (in 128k units)
       romFile.writeByte(Math.trunc(rom.paddedRomSizeKB() / 128));
       romFile.writeByte(0);
 
-      // sram size in 32b units (this is zero in the source)
-      romFile.writeByte(0)
-      romFile.writeByte(0)
+      // sram "block BBBBBB" flags
+      romFile.writeByte(rom.paddedRamSizeKB() > 0 ? 1 : 0); // true if 8 used
+      romFile.writeByte(rom.paddedRamSizeKB() > 8 ? 1 : 0); // true if 32 used
 
       romFile.seek(romFileIndex + 63);
 
@@ -414,7 +439,7 @@ class Processor {
     
     // Set ram state
     romFile.seek(0x2101 + i);
-    if (rom.ramByte > 0) {
+    if (rom.ramByte > 0 || rom.typeByte == 0x06) { // has ram or MBC2
       romFile.writeByte(1); // Ram enabled
     }
     else {
@@ -425,7 +450,7 @@ class Processor {
     romFile.seek(0x2201 + i);
     
     // Ram offset and if we are 8KB or 32KB locked
-    if (rom.ramByte == 2) { // 8KB
+    if (rom.ramByte == 2 || rom.typeByte == 0x06) { // 8KB or MBC2+RAM
       romFile.writeByte(offsets.ram); // 8KB locked
     }
     else if (rom.ramByte == 3) { // 32KB
@@ -436,7 +461,7 @@ class Processor {
     }
     
     // Increment ram offset after
-    if (rom.ramByte == 2) { // 8KB
+    if (rom.ramByte == 2 || rom.typeByte == 0x06) { // 8KB or MBC2+RAM
       offsets.ram += 2;
     }
     else if (rom.ramByte == 3) { // 32KB
@@ -445,8 +470,15 @@ class Processor {
   }
 
   parseMenuData(menuBuffer, fontIndex) {
-    this.roms = [];
+    const roms = [];
     const menuFile = new FileSeeker(menuBuffer);
+
+    menuFile.seek(0x134);
+    const title = String.fromCharCode(...menuFile.read(0xF)).replace(/\0/g, '');
+    if (!title.includes(MENU_TITLE_CHECK)) {
+      alert(`${title} does not appear to be a menu ROM!\nDid you select a regular ROM by mistake?`);
+      return [];
+    }
 
     let romSizes = [];
     for (let i = 0; i < 7; i++) {
@@ -465,17 +497,17 @@ class Processor {
         for (let i = 0; i < romSizes.length; i++) {
           const romData = menuFile.read(romSizes[i] * 128 * 1024);
           const romBuffer = (new Uint8Array(romData)).buffer;
-          this.roms.push(new ROM(romBuffer, fontIndex))
+          roms.push(new ROM(romBuffer, fontIndex))
         }
       } catch(e) {
         console.log(e)
-        alert("Failed to parse roms!");
+        alert("Failed to parse roms from menu file!");
       }
     } else {
-      alert("No roms detected!")
+      alert("No roms detected in menu file!")
     }
 
-    return this.roms;
+    return roms;
   }
 }
 
@@ -489,7 +521,10 @@ class TickerText {
   generate() {
     let buffer = [];
     const canvas = this.canvas;
-    const text = this.text;
+    let text = this.text;
+    if (this.fontIndex == 3) {
+      text = text.toUpperCase();
+    }
     const font =  FONTS[this.fontIndex].style;
 
     const ctx = canvas.getContext('2d');
@@ -505,8 +540,7 @@ class TickerText {
     ctx.font = font;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#888';
-    ctx.fillText(text,3,14);
+
     ctx.fillStyle = 'white';
     ctx.fillText(text,1,12);
 
@@ -516,11 +550,9 @@ class TickerText {
       let byte = 0;
       for (let j = 0; j < 4; j++) {
         let red = imageData[i+j*4];
-        if (red < 100) {
+        if (red < 210) {
           byte = byte | 0b11 << (6 - j*2);
-        } else if (red < 210) {
-          byte = byte | 0b01 << (6 - j*2);
-        }
+        } 
       }
       buffer.push(byte)
     }
@@ -543,6 +575,31 @@ class TickerText {
     }
 
     return outputBuffer;
+  }
+}
+
+class Patcher {
+  constructor(patchData) {
+    this.patchData = patchData;
+  }
+
+  apply(file) {
+    const originalPosition = file.position;
+    this.patchData.forEach((patch) => {
+      file.seek(patch.address);
+      if (patch.rleData) {
+        patch.rleData.forEach((data) => {
+          if (Array.isArray(data)) {
+            for (let i = 0; i < data[1]; i++) { file.writeByte(data[0]); }
+          } else {
+            file.writeByte(data)
+          }
+        })
+      } else {
+        file.writeBytes(patch.data);
+      }
+    });
+    file.seek(originalPosition);
   }
 }
 

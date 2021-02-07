@@ -1,3 +1,7 @@
+const parseBool = (boolString) => {
+  return boolString.toLowerCase() === 'true';
+};
+
 Vue.component('bitmap-preview', {
   props: ['data'],
   mounted: function() {
@@ -69,14 +73,18 @@ let app = new Vue({
     romData: '',
     fontIndex: 0,
     forceDMG: false,
-    fontsLoaded: false,
+    englishPatch: false,
     cartType: 0,
+    fontsLoaded: false,
     livePreviewTimeoutHandle: null
   },
   created: function() {
+    this.loadSettingsFromStorage();
+
     this.processor.menu = this.menu;
     this.processor.tickerText = this.tickerText;
     this.processor.forceDMG = this.forceDMG;
+    this.processor.englishPatch = this.englishPatch;
 
     this.updateLivePreview();
 
@@ -92,9 +100,23 @@ let app = new Vue({
     romOverflow: function() { return this.processor.romOverflow(); }
   },
   watch: {
+    roms: function() { this.processor.roms = this.roms; },
+    forceDMG: function() {
+      this.processor.forceDMG = this.forceDMG;
+      this.writeSettingsToStorage();
+    },
+    cartType: function() {
+      this.processor.cartType = this.cartType;
+      this.writeSettingsToStorage();
+    },
+    englishPatch: function() {
+      this.processor.englishPatch = this.englishPatch;
+      this.writeSettingsToStorage();
+    },
     fontIndex: function() {
       for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
       this.updateLivePreview();
+      this.writeSettingsToStorage();
     },
     forceDMG: function() { this.processor.forceDMG = this.forceDMG; this.updateLivePreview(); },
     cartType: function() { this.processor.cartType = this.cartType; }
@@ -103,59 +125,61 @@ let app = new Vue({
     addMenu: function(e) {
       let fileReader = new FileReader()
       fileReader.onload = () => {
-        this.roms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+        const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+        if (parsedRoms.length > 0) { this.roms = parsedRoms; }
       }
       fileReader.readAsArrayBuffer(e.target.files[0]);
       this.updateLivePreview();
       e.target.value = '';
     },
-    addROM: function(e) {
-      const files = e.target.files;
+    addROM: function(e, f) {
+      const files = f || e.target.files;
       for (let i = 0; i < files.length; i++) {
         let fileReader = new FileReader();
         fileReader.onload = () => {
-          const rom = new ROM(fileReader.result, this.fontIndex)
-          if (!rom.bad) { this.roms.push(rom); }
+          const rom = new ROM(fileReader.result, this.fontIndex);
+          if (rom.isMenu()) {
+            const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+            parsedRoms.forEach((rom) => this.roms.push(rom));
+          } else if (!rom.bad) {
+            this.roms.push(rom);
+          }
         }
         fileReader.readAsArrayBuffer(files[i]);
       }
 
-      this.processor.roms = this.roms;
       this.updateLivePreview();
-
-      e.target.value = '';
+      if (e) { e.target.value = ''; }
     },
     removeROM: function(index) {
       this.roms.splice(index, 1);
-      this.processor.roms = this.roms;
       this.updateLivePreview();
     },
     removeAllRoms: function() {
       this.roms = [];
-      this.processor.roms = this.roms;
       this.updateLivePreview();
     },
     moveUp: function(index) {
       let rom = this.roms[index];
       this.roms.splice(index, 1);
       this.roms.splice(index - 1, 0, rom);
-      this.processor.roms = this.roms;
       this.updateLivePreview();
     },
     moveDown: function(index) {
       let rom = this.roms[index];
       this.roms.splice(index, 1);
       this.roms.splice(index + 1, 0, rom);
-      this.processor.roms = this.roms;
       this.updateLivePreview();
     },
     downloadMapFile: function(e) {
+      this.processor.roms = this.roms; // in case they got out of sync
       if (this.cartType == 0) { // regular power cart only
         if (this.mapData) { URL.revokeObjectURL(this.mapData) }
         this.mapData = URL.createObjectURL(new Blob([this.processor.mapData()]));
       }
     },
     downloadRomFile: function(e) {
+      this.processor.roms = this.roms; // in case they got out of sync
       if (this.romData) { URL.revokeObjectURL(this.romData) }
       this.romData = URL.createObjectURL(new Blob([this.processor.romData()]));
     },
@@ -166,7 +190,28 @@ let app = new Vue({
         this.updateLivePreview();
       }, 500);
     },
-    stopPropagation: function(e) { e.stopImmediatePropagation(); },
+    dropFile: function(e) {
+      this.addROM(null, e.dataTransfer.files);
+      e.target.classList.remove('over')
+      e.preventDefault();
+    },
+    writeSettingsToStorage: function () {
+      window.localStorage.setItem('fontIndex', this.fontIndex);
+      window.localStorage.setItem('forceDMG', this.forceDMG);
+      window.localStorage.setItem('englishPatch', this.englishPatch);
+      window.localStorage.setItem('cartType', this.cartType);
+    },
+    loadSettingsFromStorage: function() {
+      const fontIndex = window.localStorage.getItem('fontIndex');
+      const forceDMG = window.localStorage.getItem('forceDMG');
+      const englishPatch = window.localStorage.getItem('englishPatch');
+      const cartType = window.localStorage.getItem('cartType');
+
+      if (fontIndex) { this.fontIndex = parseInt(fontIndex); }
+      if (forceDMG) { this.forceDMG = parseBool(forceDMG); }
+      if (englishPatch) { this.englishPatch = parseBool(englishPatch); }
+      if (cartType) { this.cartType = parseInt(cartType); }
+    },
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
     triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
     updateLivePreview: function() {
@@ -175,7 +220,9 @@ let app = new Vue({
         this.processor.romData();
         romPreviewInitialize();
       }, 500);
-    }
+    },
+    stopPropagation: function(e) { e.stopImmediatePropagation(); },
+    preventDefault: function(e) { e.preventDefault(); },
   }
 });
 

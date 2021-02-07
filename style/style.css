@@ -45,13 +45,18 @@ h1, h2 {
 
 h2 {
   color: #444;
-  border-top: 2px dotted grey;
+  border-top: 1px solid grey;
   display: inline-block;
-  border-bottom: 2px dotted grey;
+  border-bottom: 1px solid grey;
 }
 
 p {
   margin-top: 0;
+}
+
+ul {
+  margin: 0;
+  padding-left: 10px;
 }
 
 footer {
@@ -88,7 +93,7 @@ button[disabled='disabled'] {
 }
 
 .text-container {
-  width: 850px;
+  max-width: 850px;
   margin-bottom:25px;
 }
 
@@ -181,25 +186,33 @@ noscript {
   color: red;
 }
 
-.cart-option {
-  display: inline-block;
-  width: 280px;
-  height: 35px;
-  text-align: center;
-  border: 1px solid #CCC;
-  cursor: pointer;
+.drag-target {
+  height: 70px;
+  max-width: 945px;
+  padding: 20px;
+  border: 2px dashed grey;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  transition: 0.5s all;
 }
 
-.cart-option * { cursor: pointer; }
-
-.cart-option div {
-  margin-top: 6px;
+.drag-target.over {
+  background-color: #f5f5f5;
+  border-color: #000079;
 }
 
-.cart-option label {
-  vertical-align: middle;
+.flex-row {
+  display: inline-flex;
 }
 
-.cart-option.selected {
-  border: 1px solid #000079;
+.flex-item {
+  max-width: 400px;
+  margin-right: 20px;
+}
+
+.games-flex-item {
+  min-width: 250px;
+  margin-right: 20px;
 }
