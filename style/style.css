@@ -223,3 +223,11 @@ noscript {
 .single-rom-download {
   margin-top: 1.5rem;
 }
+
+.hide {
+  display: none;
+}
+
+.ticker-settings {
+  margin-top: 0.4rem;
+}

@@ -215,6 +215,7 @@ class Processor {
     this.tickerBitmap = [];
     this.cartType = 0;
     this.englishPatch = false;
+    this.tickerType = 1;
   }
 
   romTotalKB() {
@@ -343,10 +344,12 @@ class Processor {
     }
 
     // ticker text
-    romFile.seek(0x18040);
-    romFile.writeByteUntil(0x00, 0x19140); // overwrite existing data
-    romFile.seek(0x18040);
-    romFile.writeBytes(Array.from(this.tickerBitmap));
+    if (this.tickerType == 1) {
+      romFile.seek(0x18040);
+      romFile.writeByteUntil(0x00, 0x19140); // overwrite existing data
+      romFile.seek(0x18040);
+      romFile.writeBytes(Array.from(this.tickerBitmap));
+    }
 
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
