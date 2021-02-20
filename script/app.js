@@ -27,7 +27,7 @@ Vue.component('bitmap-preview', {
 });
 
 Vue.component('ticker-settings', {
-  props: ['processor', 'fontsLoaded', 'fontIndex'],
+  props: ['processor', 'fontsLoaded', 'fontIndex', 'show'],
   data: function() {
     return ({
       text: "Created with GBNP on " + (new Date).toISOString().slice(0, 10) + "!"
@@ -45,18 +45,14 @@ Vue.component('ticker-settings', {
     text: function() { this.updateBitmap() }
   },
   template: `
-    <div class="settings-row">
-      <span class="settings-label">Ticker Text: </span>
+    <div :class="{ hide: !show }" class="ticker-settings">
+      <div>
+        <input style="width: 450px;" type="text" v-model="text"/>
+      </div>
 
-      <div style="display:inline-block;">
-        <div>
-          <input style="width: 450px;" type="text" v-model="text"/>
-        </div>
-
-        <div style="height: 17px; background-color: black">
-          <img src="img/ticker_logo.png" style="height: 16px; padding-top: 1px"/>
-          <canvas id="ticker-canvas" ref="canvas" height="16" style="vertical-align: top"></canvas>
-        </div>
+      <div style="height: 17px; background-color: black">
+        <img src="img/ticker_logo.png" style="height: 16px; padding-top: 1px"/>
+        <canvas id="ticker-canvas" ref="canvas" height="16" style="vertical-align: top"></canvas>
       </div>
     </div>
   `
@@ -76,6 +72,7 @@ let app = new Vue({
     forceDMG: false,
     englishPatch: false,
     cartType: 0,
+    tickerType: 1,
     fontsLoaded: false,
   },
   created: function() {
@@ -85,6 +82,7 @@ let app = new Vue({
     this.processor.tickerText = this.tickerText;
     this.processor.forceDMG = this.forceDMG;
     this.processor.englishPatch = this.englishPatch;
+    this.processor.tickerType = this.tickerType;
 
     if (window.location.search.substr(1).toLowerCase() == 'ig') {
       this.cartType = 1;
@@ -127,6 +125,10 @@ let app = new Vue({
     },
     englishPatch: function() {
       this.processor.englishPatch = this.englishPatch;
+      this.writeSettingsToStorage();
+    },
+    tickerType: function() {
+      this.processor.tickerType = this.tickerType;
       this.writeSettingsToStorage();
     },
     fontIndex: function() {
@@ -214,17 +216,20 @@ let app = new Vue({
       window.localStorage.setItem('forceDMG', this.forceDMG);
       window.localStorage.setItem('englishPatch', this.englishPatch);
       window.localStorage.setItem('cartType', this.cartType);
+      window.localStorage.setItem('tickerType', this.tickerType);
     },
     loadSettingsFromStorage: function() {
       const fontIndex = window.localStorage.getItem('fontIndex');
       const forceDMG = window.localStorage.getItem('forceDMG');
       const englishPatch = window.localStorage.getItem('englishPatch');
       const cartType = window.localStorage.getItem('cartType');
+      const tickerType = window.localStorage.getItem('tickerType');
 
       if (fontIndex) { this.fontIndex = parseInt(fontIndex); }
       if (forceDMG) { this.forceDMG = parseBool(forceDMG); }
       if (englishPatch) { this.englishPatch = parseBool(englishPatch); }
       if (cartType) { this.cartType = parseInt(cartType); }
+      if (tickerType) { this.tickerType = parseInt(tickerType); }
     },
     triggerAddMenuLabel: function(e) { this.$refs.addMenuLabel.click(); },
     triggerAddRomLabel: function(e) { this.$refs.addRomLabel.click(); },
