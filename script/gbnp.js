@@ -17,7 +17,8 @@ const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
-  { style: 'normal 16px Gamer', y: 7 }
+  { style: 'normal 16px Gamer', y: 7 },
+  { style: 'normal 5px PICO-8', y: 7 },
 ];
 const MENU_TITLE_CHECK = 'NP M-MENU';
 
@@ -529,6 +530,7 @@ class TickerText {
       text = text.toUpperCase();
     }
     const font =  FONTS[this.fontIndex].style;
+    console.log(font);
 
     const ctx = canvas.getContext('2d');
     ctx.font = font;

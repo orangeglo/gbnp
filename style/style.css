@@ -26,6 +26,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Katakana";
+  src: url("../font/7pxKT.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 html {
   font-family: sans-serif;
   line-height: 1.4;
@@ -182,6 +189,10 @@ label#pokemon {
   font-family: 'PokemonGB';
   position: relative;
   top: 3px;
+}
+
+label#katakana {
+  font-family: 'Katakana';
 }
 
 noscript {
