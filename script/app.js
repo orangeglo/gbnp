@@ -27,7 +27,7 @@ Vue.component('bitmap-preview', {
 });
 
 Vue.component('ticker-settings', {
-  props: ['processor', 'fontsLoaded', 'fontIndex', 'show'],
+  props: ['processor', 'fontsLoaded', 'fontIndex', 'customFont', 'show'],
   data: function() {
     return ({
       text: "Created with GBNP on " + (new Date).toISOString().slice(0, 10) + "!"
@@ -35,12 +35,18 @@ Vue.component('ticker-settings', {
   },
   methods: {
     updateBitmap: function() {
-      const bitmap = (new TickerText(this.text, this.fontIndex, this.$refs.canvas)).generate()
+      const bitmap = (new TickerText(
+        this.text,
+        this.fontIndex,
+        this.customFont,
+        this.$refs.canvas
+      )).generate()
       this.processor.tickerBitmap = bitmap;
     }
   },
   watch: {
     fontIndex: function() { this.updateBitmap() },
+    customFont: function() { this.updateBitmap() },
     fontsLoaded: function () { this.updateBitmap() },
     text: function() { this.updateBitmap() }
   },
@@ -69,6 +75,7 @@ let app = new Vue({
     romData: '',
     singleRomMapData: '',
     fontIndex: 0,
+    customFont: null,
     forceDMG: false,
     englishPatch: false,
     cartType: 0,
@@ -132,7 +139,15 @@ let app = new Vue({
       this.writeSettingsToStorage();
     },
     fontIndex: function() {
-      for (let i = 0; i < this.roms.length; i++) { this.roms[i].updateBitmap(this.fontIndex); }
+      for (let i = 0; i < this.roms.length; i++) {
+        this.roms[i].updateBitmap(this.fontIndex, this.customFont);
+      }
+      this.writeSettingsToStorage();
+    },
+    customFont: function() {
+      for (let i = 0; i < this.roms.length; i++) {
+        this.roms[i].updateBitmap(this.fontIndex, this.customFont);
+      }
       this.writeSettingsToStorage();
     },
   },
@@ -140,7 +155,7 @@ let app = new Vue({
     addMenu: function(e) {
       let fileReader = new FileReader()
       fileReader.onload = () => {
-        const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+        const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex, this.customFont);
         if (parsedRoms.length > 0) { this.roms = parsedRoms; }
       }
       fileReader.readAsArrayBuffer(e.target.files[0]);
@@ -152,9 +167,9 @@ let app = new Vue({
       for (let i = 0; i < files.length; i++) {
         let fileReader = new FileReader();
         fileReader.onload = () => {
-          const rom = new ROM(fileReader.result, this.fontIndex);
+          const rom = new ROM(fileReader.result, this.fontIndex, this.customFont);
           if (rom.isMenu()) {
-            const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
+            const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex, this.customFont);
             parsedRoms.forEach((rom) => this.roms.push(rom));
           } else if (!rom.bad) {
             this.roms.push(rom);

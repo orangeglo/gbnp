@@ -53,7 +53,7 @@ class Menu {
 }
 
 class ROM {
-  constructor(arrayBuffer, fontIndex) {
+  constructor(arrayBuffer, fontIndex, customFont) {
     let file = new FileSeeker(arrayBuffer);
 
     file.seek(0x134);
@@ -70,7 +70,7 @@ class ROM {
     this.romByte = file.readByte();
     this.ramByte = file.readByte();
 
-    this.updateBitmap(fontIndex);
+    this.updateBitmap(fontIndex, customFont);
 
     file.rewind();
     this.arrayBuffer = new ArrayBuffer(this.paddedRomSizeKB() * 1024);
@@ -130,7 +130,7 @@ class ROM {
     this.updateBitmap(fontIndex);
   }
 
-  updateBitmap(fontIndex) {
+  updateBitmap(fontIndex, customFont) {
     let buffer = [];
 
     const canvas = document.createElement("canvas");
@@ -140,7 +140,15 @@ class ROM {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, 128, 8);
-    const font = FONTS[fontIndex || 0];
+
+    let font = { style: customFont, y: 7 };
+    if (fontIndex < FONTS.length) {
+      font = FONTS[fontIndex];
+    }
+
+    // console.log(font)
+
+    // const font = FONTS[fontIndex || 0];
     ctx.font = font.style;
     ctx.fillStyle = 'black';
 
@@ -472,7 +480,7 @@ class Processor {
     }
   }
 
-  parseMenuData(menuBuffer, fontIndex) {
+  parseMenuData(menuBuffer, fontIndex, customFont) {
     const roms = [];
     const menuFile = new FileSeeker(menuBuffer);
 
@@ -500,7 +508,7 @@ class Processor {
         for (let i = 0; i < romSizes.length; i++) {
           const romData = menuFile.read(romSizes[i] * 128 * 1024);
           const romBuffer = (new Uint8Array(romData)).buffer;
-          roms.push(new ROM(romBuffer, fontIndex))
+          roms.push(new ROM(romBuffer, fontIndex, customFont))
         }
       } catch(e) {
         console.log(e)
@@ -515,9 +523,10 @@ class Processor {
 }
 
 class TickerText {
-  constructor(text, fontIndex, canvas) {
+  constructor(text, fontIndex, customFont, canvas) {
     this.text = text;
     this.fontIndex = fontIndex;
+    this.customFont = customFont;
     this.canvas = canvas;
   }
 
@@ -528,7 +537,10 @@ class TickerText {
     if (this.fontIndex == 3) {
       text = text.toUpperCase();
     }
-    const font =  FONTS[this.fontIndex].style;
+    let font = this.customFont;
+    if (this.fontIndex < FONTS.length) {
+      font = FONTS[this.fontIndex].style;
+    }
 
     const ctx = canvas.getContext('2d');
     ctx.font = font;
