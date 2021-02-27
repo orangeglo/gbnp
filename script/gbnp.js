@@ -17,8 +17,7 @@ const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
-  { style: 'normal 16px Gamer', y: 7 },
-  { style: 'normal 5px PICO-8', y: 7 },
+  { style: 'normal 8px GBmem', y: 6 },
 ];
 const MENU_TITLE_CHECK = 'NP M-MENU';
 
@@ -146,9 +145,13 @@ class ROM {
     ctx.fillStyle = 'black';
 
     let text = this.menuText;
+
+    // adjust JP font
     if (fontIndex == 3) {
       text = text.toUpperCase();
+      text = textToFullWidthPunc(text);
     }
+
     ctx.fillText(text,1,font.y);
     ctx.fillStyle = 'white';
     ctx.fillRect(127, 0, 127, 8);
@@ -525,15 +528,18 @@ class TickerText {
   generate() {
     let buffer = [];
     const canvas = this.canvas;
+
     let text = this.text;
+    // apply transforms for JP font
     if (this.fontIndex == 3) {
       text = text.toUpperCase();
+      text = textToFullWidthPunc(text);
     }
-    const font =  FONTS[this.fontIndex].style;
-    console.log(font);
+
+    const font = FONTS[this.fontIndex];
 
     const ctx = canvas.getContext('2d');
-    ctx.font = font;
+    ctx.font = font.style;
     let width = Math.ceil(ctx.measureText(text).width) + 2
     for (let i = 0; i < 16; i++) {
       if ((width % 16) == 0) { break; }
@@ -542,12 +548,12 @@ class TickerText {
     width = Math.min(1024, Math.max(64, width));
 
     canvas.width = width;
-    ctx.font = font;
+    ctx.font = font.style;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = 'white';
-    ctx.fillText(text,1,12);
+    ctx.fillText(text,1,5 + font.y);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
@@ -657,3 +663,10 @@ class FileSeeker {
     }
   }
 }
+
+const FULL_WIDTH_PUNC = {
+  '-': 'ー', '!': '！', '?': '？', '&': '＆', '(': '（', ')': '）', '~': '～',
+};
+const textToFullWidthPunc = (text) => {
+  return text.split('').map((char) => FULL_WIDTH_PUNC[char] || char).join('');  
+};
