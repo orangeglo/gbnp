@@ -7,9 +7,10 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 ## Features
 - Original menu built in, no need to provide ROM
 - Add up to seven games depending on their sizes
-- Four different font options for menu entry
+- Four different font options for menu entry, including a JP font similar to the original
 - Load data from a previously created rom
 - Built in romhack options, including an english translation patch
+- Generate single rom MAP files for 1MB games
 
 ## Credits
 - GB Memory Maker: https://github.com/Infinest/GB-Memory-Binary-Maker
@@ -18,4 +19,6 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 - Early GameBoy Font: https://www.dafont.com/early-gameboy.font
 - Pokemon GB Font: https://www.fontspace.com/pokemon-gb-font-f9621
 - Nokia Cellphone FC Font: https://www.dafont.com/nokia-cellphone.font
-- Gamer Font: https://www.dafont.com/gamer-2.font
+- NP GBメモリ Font
+  - This font is inspired by the font in the JP Game Boy game "Kaeru no Tame ni Kane wa Naru", which we have found to be very similar to the original font used on the Power Cart.
+  - Special thanks to "Lesserkuma" for their hard work researching accurate fonts for this project!

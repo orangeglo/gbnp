@@ -6,13 +6,6 @@
 }
 
 @font-face {
-  font-family: "Gamer";
-  src: url("../font/Gamer.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
   font-family: "Nokia";
   src: url("../font/Nokia.woff") format("woff");
   font-weight: normal;
@@ -22,6 +15,13 @@
 @font-face {
   font-family: "PokemonGB";
   src: url("../font/Pokemon.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "GBmem";
+  src: url("../font/GBmem.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -170,18 +170,15 @@ label#nokia {
   font-family: 'Nokia';
 }
 
-label#gamer {
-  font-family: 'Gamer';
-  font-size: 32px;
-  line-height: 0;
-  position: relative;
-  top: -2px;
-}
-
 label#pokemon {
   font-family: 'PokemonGB';
   position: relative;
   top: 3px;
+}
+
+label#gbmem {
+  font-family: 'GBmem';
+  text-transform: uppercase;
 }
 
 noscript {
