@@ -19,6 +19,5 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 - Early GameBoy Font: https://www.dafont.com/early-gameboy.font
 - Pokemon GB Font: https://www.fontspace.com/pokemon-gb-font-f9621
 - Nokia Cellphone FC Font: https://www.dafont.com/nokia-cellphone.font
-- NP GBメモリ Font
-  - This font is inspired by the font in the JP Game Boy game "Kaeru no Tame ni Kane wa Naru", which we have found to be very similar to the original font used on the Power Cart.
-  - Special thanks to "Lesserkuma" for their hard work researching accurate fonts for this project!
+- NP GBメモリ (DMG-MMUS) Font
+  - This is an attempt at reproducing the original font used on the GB Memory cartridge. Since the font is not stored in the rom, "Lesserkuma" has been working to recreate the font by studying cartridge dumps. The font started life as the one used in the JP Game Boy game "Kaeru no Tame ni Kane wa Naru", and has been tweaked to closly resemble the original GB Memory font! Special thanks to "Lesserkuma" for their hard work!

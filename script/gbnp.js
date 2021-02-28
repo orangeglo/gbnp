@@ -17,7 +17,7 @@ const FONTS = [
   { style: 'normal 8px Gameboy', y: 7 },
   { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
-  { style: 'normal 8px GBmem', y: 6 },
+  { style: 'normal 8px DMG-MMSA', y: 7 },
 ];
 const MENU_TITLE_CHECK = 'NP M-MENU';
 
@@ -665,7 +665,7 @@ class FileSeeker {
 }
 
 const FULL_WIDTH_PUNC = {
-  '-': 'ー', '!': '！', '?': '？', '&': '＆', '(': '（', ')': '）', '~': '～',
+  '!': '！', '?': '？', '&': '＆', '(': '（', ')': '）', '~': '～',
 };
 const textToFullWidthPunc = (text) => {
   return text.split('').map((char) => FULL_WIDTH_PUNC[char] || char).join('');  

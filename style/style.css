@@ -20,8 +20,8 @@
 }
 
 @font-face {
-  font-family: "GBmem";
-  src: url("../font/GBmem.woff") format("woff");
+  font-family: "DMG-MMSA";
+  src: url("../font/DMG-MMSA.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -177,7 +177,7 @@ label#pokemon {
 }
 
 label#gbmem {
-  font-family: 'GBmem';
+  font-family: 'DMG-MMSA';
   text-transform: uppercase;
 }
 
