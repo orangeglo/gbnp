@@ -57,7 +57,7 @@ class ROM {
     let file = new FileSeeker(arrayBuffer);
 
     file.seek(0x134);
-    this.title = String.fromCharCode(...file.read(0xF)).replace(/\0/g, '');
+    this.title = String.fromCharCode(...file.read(0xF)).replace(/\0/g, '').trim();
     this.menuText = this.title;
 
     file.seek(0x143);
