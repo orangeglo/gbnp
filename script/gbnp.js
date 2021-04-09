@@ -61,8 +61,8 @@ class ROM {
     this.menuText = this.title;
 
     file.seek(0x143);
-    let cgbByte = file.readByte();
-    this.cgb = cgbByte == 0x80 || cgbByte == 0xC0;
+    this.cgbByte = file.readByte();
+    this.cgb = this.cgbByte == 0x80 || this.cgbByte == 0xC0;
 
     file.seek(0x147);
     this.typeByte = file.readByte();
@@ -355,13 +355,19 @@ class Processor {
       romFile.writeBytes(Array.from(this.tickerBitmap));
     }
 
+    // timestamp / writer id
+    const date = (new Date).toISOString().split('.')[0].replace('T', '').replace(/-/g, '/');
+    const timestampId = `${date} ORANGE `; // should be 26 bytes
+    romFile.seek(0x1C1BF);
+    romFile.writeBytes(stringToCharArray(timestampId));
+
     let romBase = 0x01;
     let romFileIndex = 0x1C200;
 
-    // disable existing entries
+    // wipe existing entries
     for (let i = 0; i < 7; i++) {
       romFile.seek(romFileIndex + i * 512);
-      romFile.writeByte(0xFF);
+      romFile.writeByteUntil(0xFF, romFileIndex + (i+1) * 512);
     }
 
 
@@ -370,6 +376,8 @@ class Processor {
 
     for (let i = 0; i < this.roms.length; i++) {
       const rom = this.roms[i];
+      romFile.seek(romFileIndex);
+      romFile.writeByteUntil(0, romFileIndex + 512);
       romFile.seek(romFileIndex);
 
       // rom index
@@ -390,10 +398,27 @@ class Processor {
       romFile.writeByte(rom.paddedRamSizeKB() > 0 ? 1 : 0); // true if 8 used
       romFile.writeByte(rom.paddedRamSizeKB() > 8 ? 1 : 0); // true if 32 used
 
-      romFile.seek(romFileIndex + 63);
+      // game identifier "DMG -TRA -  "
+      romFile.writeBytes(
+        stringToCharArray(`${rom.cgbByte == 0xC0 ? 'CGB' : 'DMG'} -??? -  `)
+      ); // 12 characters
+
+      // Shift-JIS title (override with ascii)
+      romFile.seek(romFileIndex + 19);
+      romFile.writeByteUntil(0, 0x1C23F) // override with zeros
+      romFile.seek(romFileIndex + 20); // leave first byte emtpy to identify as ascii text
+      romFile.writeBytes(stringToCharArray(rom.title));
 
       // title bitmap
+      romFile.seek(romFileIndex + 63); // 0x1C23F
       romFile.writeBytes(rom.bitmapBuffer);
+
+      // timestamp / writer id
+      romFile.seek(romFileIndex + 0x1BF); //0x1C3BF
+      romFile.writeBytes(stringToCharArray(timestampId));
+
+      // final padding
+      romFile.writeByteUntil(0xFF, romFileIndex + 512);
 
       romFileIndex += 512
     
@@ -662,6 +687,10 @@ class FileSeeker {
       this.writeByte(byte)
     }
   }
+}
+
+const stringToCharArray = (str) => {
+  return str.split('').map(c => c.charCodeAt(0));
 }
 
 const FULL_WIDTH_PUNC = {
