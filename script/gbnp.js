@@ -61,8 +61,14 @@ class ROM {
     this.menuText = this.title;
 
     file.seek(0x143);
-    this.cgbByte = file.readByte();
-    this.cgb = this.cgbByte == 0x80 || this.cgbByte == 0xC0;
+    const cgbByte = file.readByte();
+    this.cgb = cgbByte == 0x80 || cgbByte == 0xC0;
+
+    this.code = `${cgbByte == 0xC0 ? 'CGB' : 'DMG'} -??? -  `; // default code
+    if (typeof TITLE_TO_CODE === 'object' && TITLE_TO_CODE[this.title.replace(/ /g, '')]) {
+      const code = TITLE_TO_CODE[this.title.replace(/ /g, '')];
+      this.code = `${code.slice(0, 3)} ${code.slice(3)} -  `.slice(0, 12);
+    }
 
     file.seek(0x147);
     this.typeByte = file.readByte();
@@ -399,9 +405,7 @@ class Processor {
       romFile.writeByte(rom.paddedRamSizeKB() > 8 ? 1 : 0); // true if 32 used
 
       // game identifier "DMG -TRA -  "
-      romFile.writeBytes(
-        stringToCharArray(`${rom.cgbByte == 0xC0 ? 'CGB' : 'DMG'} -??? -  `)
-      ); // 12 characters
+      romFile.writeBytes(stringToCharArray(rom.code)); // 12 characters
 
       // Shift-JIS title (override with ascii)
       romFile.seek(romFileIndex + 19);
