@@ -87,6 +87,10 @@ let app = new Vue({
     if (window.location.search.substr(1).toLowerCase() == 'ig') {
       this.cartType = 1;
     }
+
+    window.addEventListener('error', (e) => {
+      alert("Whoops, some sort of exception occured! Open an issue in the GitHub repo to tell me what happened, or message me on Discord (info in footer).")
+    });
   },
   computed: {
     downloadEnabled: function() {
