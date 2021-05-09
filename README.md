@@ -7,7 +7,7 @@ This tool can build the data necessary to flash new games to a [Nintendo Power G
 ## Features
 - Original menu built in, no need to provide ROM
 - Add up to seven games depending on their sizes
-- Four different font options for menu entry, including a JP font similar to the original
+- Five different font options for menu entry, including a JP font similar to the original
 - Load data from a previously created rom
 - Built in romhack options, including an english translation patch
 - Generate single rom MAP files for 1MB games
