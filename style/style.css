@@ -26,6 +26,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "TWL-IRAJ-1";
+  src: url("../font/TWL-IRAJ-1.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 html {
   font-family: sans-serif;
   line-height: 1.4;
@@ -179,6 +186,10 @@ label#pokemon {
 label#gbmem {
   font-family: 'DMG-MMSA';
   text-transform: uppercase;
+}
+
+label#twliraj1 {
+  font-family: 'TWL-IRAJ-1';
 }
 
 noscript {
