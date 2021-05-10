@@ -18,6 +18,7 @@ const FONTS = [
   { style: 'normal 8px PokemonGB', y: 7 },
   { style: 'normal 8px Nokia', y: 7 },
   { style: 'normal 8px DMG-MMSA', y: 7 },
+  { style: 'normal 8px TWL-IRAJ-1', y: 7 },
 ];
 const MENU_TITLE_CHECK = 'NP M-MENU';
 
