@@ -210,8 +210,16 @@ noscript {
 }
 
 .drag-target.over {
-  background-color: #f5f5f5;
   border-color: #000079;
+  transform: scale(1.02, 1.05);
+  cursor: grabbing;
+}
+
+.drag-target div {
+  transition: 0.5s all;
+}
+.drag-target.over div {
+  opacity: 0.5;
 }
 
 .flex-row {
