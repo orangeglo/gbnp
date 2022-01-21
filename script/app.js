@@ -30,7 +30,7 @@ Vue.component('ticker-settings', {
   props: ['processor', 'fontsLoaded', 'fontIndex', 'show'],
   data: function() {
     return ({
-      text: "Created with GBNP on " + (new Date).toISOString().slice(0, 10) + "!"
+      text: "Created with GBNP on " + (new Date).toISOString().slice(0, 10)
     });
   },
   methods: {
