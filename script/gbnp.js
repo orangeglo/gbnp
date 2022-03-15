@@ -95,7 +95,6 @@ class ROM {
 
     if (!this.valid()) { alert('File is not a valid Game Boy ROM!'); this.bad = true; }
     else if (!this.type) { alert(`Error with ${this.title}!\nCartridge type could not be determined!`); this.bad = true; }
-    else if (this.ramSizeKB() > 32) { alert(`Error with ${this.title}!\nGame requires more than 32 KB of RAM!`); this.bad = true; }
   }
 
   valid() {
@@ -269,19 +268,20 @@ class Processor {
       let rom = this.roms[i];
       let bits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // 16
 
-      // set mbc bits
+      // set mbc bits (bits 0-2)
       let tb = rom.typeByte
-      if (tb >= 0x01 && tb <= 0x03) {
+      if (tb >= 0x01 && tb <= 0x03) { // MBC1
         bits[15] = 0; bits[14] = 0; bits[13] = 1;
-      } else if (tb >= 0x05 && tb <= 0x06) {
+      } else if (tb >= 0x05 && tb <= 0x06) { // MBC2
         bits[15] = 0; bits[14] = 1; bits[13] = 0;
-      } else if (tb >= 0x0F && tb <= 0x13 ) {
+      } else if (tb >= 0x0F && tb <= 0x13 ) { // MBC3
         bits[15] = 0; bits[14] = 1; bits[13] = 1;
-      } else if (tb >= 0x19 && tb <= 0x1E ) {
+      } else if (tb >= 0x19 && tb <= 0x1E ) { // MBC5
         bits[15] = 1; bits[14] = 0; bits[13] = 0;
+        // bits[15] = 1; bits[14] = 0; bits[13] = 1; // This was found for MBC5 in a SMB Deluxe dump
       }
 
-      // set rom bits
+      // set rom bits (bits 3-5)
       let rs = rom.paddedRomSizeKB();
       if (rs == 64) { // 010
         bits[12] = 0; bits[11] = 1; bits[10] = 0;
@@ -295,15 +295,20 @@ class Processor {
         bits[12] = 1; bits[11] = 0; bits[10] = 1;
       }
 
-      // set ram bits
+      // set ram bits (bits 7-9) (bit 9 ORd with rom offset)
+      let rskb = rom.ramSizeKB();
       if (rom.typeByte == 0x06) { // MBC2+BATTERY 001
         bits[9] = 0; bits[8] = 0; bits[7] = 1;
-      } else if (rom.ramSizeKB == 0) { // No RAM 000
+      } else if (rskb == 0) { // No RAM 000
         bits[9] = 0; bits[8] = 0; bits[7] = 0;
-      } else if (rom.ramSizeKB == 8) { // 8KB 010
+      } else if (rskb == 8) { // 8KB 010
         bits[9] = 0; bits[8] = 1; bits[7] = 0;
-      } else if (rom.ramSizeKB >= 32) { // 32KB+ 011
+      } else if (rskb == 32) { // 32KB 011
         bits[9] = 0; bits[8] = 1; bits[7] = 1;
+      } else if (rskb == 64) { // 64KB 100
+        bits[9] = 1; bits[8] = 0; bits[7] = 0;
+      } else if (rskb == 128) { // 128KB 101
+        bits[9] = 1; bits[8] = 0; bits[7] = 1;
       } else { // < 8KB 010
         bits[9] = 0; bits[8] = 1; bits[7] = 0;
       }
@@ -317,7 +322,7 @@ class Processor {
 
       // ram offset
       mapFile.writeByte(Math.trunc(ramOffset / 2));
-      // this is the way it was in C# source, don't really understand why everything gets 8
+      // this is the way it was in C# source, don't really understand why everything gets at least 8
       ramOffset += (rom.typeByte === 0x06 || rom.ramSizeKB() < 8) ? 8 : rom.ramSizeKB();
     }
 
