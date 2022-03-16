@@ -277,8 +277,7 @@ class Processor {
       } else if (tb >= 0x0F && tb <= 0x13 ) { // MBC3
         bits[15] = 0; bits[14] = 1; bits[13] = 1;
       } else if (tb >= 0x19 && tb <= 0x1E ) { // MBC5
-        bits[15] = 1; bits[14] = 0; bits[13] = 0;
-        // bits[15] = 1; bits[14] = 0; bits[13] = 1; // This was found for MBC5 in a SMB Deluxe dump
+        bits[15] = 1; bits[14] = 0; bits[13] = 1;
       }
 
       // set rom bits (bits 3-5)
