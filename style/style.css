@@ -247,3 +247,7 @@ noscript {
 .ticker-settings {
   margin-top: 0.4rem;
 }
+
+.map-note { margin-left: 0.5rem; }
+.map-note span:first-child { font-size: 1.2rem; }
+.map-note span:last-child { vertical-align: sub; }
