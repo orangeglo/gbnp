@@ -188,7 +188,7 @@
         <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download ROM File ({{filename}}.gb)</a>
         <br>
         <a class='download-link' v-if="mapEnabled" :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File ({{filename}}.map)</a>
-        <p v-if="mapEnabled" class="map-note"><span>⤷</span><span>Note: If you are using FlashGBX, you do not need the MAP file<span></p>
+        <p v-if="mapEnabled" class="map-note"><span>⤷</span><span>Note: If you are using <a href="https://github.com/lesserkuma/FlashGBX">FlashGBX</a>, you do not need the MAP file<span></p>
 
         <div v-if="singleRomMapEnabled" class="single-rom-download">
           <div>If you want to flash {{singleRomFilename}} without the menu, you can use this MAP file to configure the cart to work with your ROM.</div>
