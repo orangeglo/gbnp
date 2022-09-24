@@ -136,39 +136,45 @@ class ROM {
     this.updateBitmap(fontIndex);
   }
 
-  updateBitmap(fontIndex) {
+  updateBitmap(fontIndex, uploadedImage) {
     let buffer = [];
 
-    const canvas = document.createElement("canvas");
+    // const canvas = document.createElement("canvas");
+    const canvas = document.getElementById("scratch-canvas");
     canvas.height = 8;
     canvas.width = 128;
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 128, 8);
-    const font = FONTS[fontIndex || 0];
-    ctx.font = font.style;
-    ctx.fillStyle = 'black';
 
-    let text = this.menuText;
+    if (!uploadedImage && this.customMenuEntry) { return; }
 
-    // adjust JP font
-    if (fontIndex == 3) {
-      text = text.toUpperCase();
-      text = textToFullWidthPunc(text);
+    if (uploadedImage) {
+      ctx.drawImage(uploadedImage, 0, 0);
+      this.customMenuEntry = true;
+    } else {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, 96, 8);
+      const font = FONTS[fontIndex || 0];
+      ctx.font = font.style;
+      ctx.fillStyle = 'black';
+      ctx.fillText(this.menuText,1,font.y);
     }
 
-    ctx.fillText(text,1,font.y);
-    ctx.fillStyle = 'white';
-    ctx.fillRect(127, 0, 127, 8);
-
-    const imageData = ctx.getImageData(0, 0, 128, 8).data;
-
+    const imageData = ctx.getImageData(0, 0, 96, 8).data;
     for (let i = 0; i < imageData.length; i+=16){
       let byte = 0;
       for (let j = 0; j < 4; j++) {
         let red = imageData[i+j*4];
-        if (red < 127) {
+        // if (red < 127) {
+        //   byte = byte | 0b11 << (6 - j*2);
+        // }
+        if (red < 30) {
+          byte = byte | 0b00 << (6 - j*2);
+        } else if (red < 160) {
+          byte = byte | 0b10 << (6 - j*2);
+        } else if (red < 224) {
+          byte = byte | 0b01 << (6 - j*2);
+        } else {
           byte = byte | 0b11 << (6 - j*2);
         }
       }
@@ -421,13 +427,6 @@ class Processor {
       // title bitmap
       romFile.seek(romFileIndex + 63); // 0x1C23F
       romFile.writeBytes(rom.bitmapBuffer);
-
-      // timestamp / writer id
-      romFile.seek(romFileIndex + 0x1BF); //0x1C3BF
-      romFile.writeBytes(stringToCharArray(timestampId));
-
-      // final padding
-      romFile.writeByteUntil(0xFF, romFileIndex + 512);
 
       romFileIndex += 512
     

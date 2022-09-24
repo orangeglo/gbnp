@@ -151,21 +151,6 @@ let app = new Vue({
 
       e.target.value = '';
     },
-    addROM: function(e, f) {
-      const files = f || e.target.files;
-      for (let i = 0; i < files.length; i++) {
-        let fileReader = new FileReader();
-        fileReader.onload = () => {
-          const rom = new ROM(fileReader.result, this.fontIndex);
-          if (rom.isMenu()) {
-            const parsedRoms = this.processor.parseMenuData(fileReader.result, this.fontIndex);
-            parsedRoms.forEach((rom) => this.roms.push(rom));
-          } else if (!rom.bad) {
-            this.roms.push(rom);
-          }
-        }
-        fileReader.readAsArrayBuffer(files[i]);
-      }
 
       if (e) { e.target.value = ''; }
     },
@@ -242,4 +227,3 @@ let app = new Vue({
   }
 });
 
-document.fonts.ready.then(function() { app.fontsLoaded = true });
