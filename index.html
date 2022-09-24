@@ -3,55 +3,45 @@
   <head>
     <meta charset="UTF-8">
     <title>Game Boy Nintendo Power ROM Builder</title>
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png"/>
+    <meta name="description" content="GBNP is a tool to create new ROMs for the Nintendo Power GB Memory cartridge.">
+    <meta property="og:description" content="GBNP is a tool to create new ROMs for the Nintendo Power GB Memory cartridge." />
+    <meta property="og:image" content="https://orangeglo.github.io/gbnp/img/gbnp.png" />
+    <meta property="og:url" content="https://orangeglo.github.io/gbnp/" />
+    <meta property="og:site_name" content="Game Boy Nintendo Power Cartridge Builder" />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#FF8800" />
+
     <script src="script/vue.min.js"></script>
     <script id="devload" src="script/devload.js"></script>
+    <script src="script/patches.js"></script>
+    <script src="script/metadata.js"></script>
     <script src="script/gbnp.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="style/style.css" />
   </head>
 
   <body>
-    <h1>GAME BOY Nintendo Power ROM Builder</h1>
+    <h1><img src="img/gbnp.png" alt="GBNP logo" title="GAME BOY Nintendo Power ROM Builder" width="250"/></h1>
     <div class='text-container'>
-      This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>. The cartridge can store up to seven roms, or a total of 896KB of game data. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
+      This tool can build the data necessary to flash new games to a <a href="https://en.wikipedia.org/wiki/Nintendo_Power_(cartridge)">Nintendo Power Game Boy cart</a>, as well as the <a href="https://shop.insidegadgets.com/product/gameboy-1mb-128kb-sram-power-cart-multi-game-and-multi-save/">insideGadgets Power Cart</a>. The menu can have up to seven roms, or a total of 896KB of game data. You can also flash a single 1MB ROM, like <a href="https://www.littlesounddj.com">LSDJ</a>, using the generated MAP file. For flashing, I recommend the <a href="https://www.gbxcart.com/">GBxCart</a>.
+      <br>
+      <br>
+      Not sure what to flash? Check out <a href="games.html">this list of favorite/well-known games that fit into the menu</a>!
     </div>
     <noscript>
       Looks like you have JS disabled. This tool needs javascript to function!
     </noscript>
     <div id="app">
-      <h2>
-        1. Upload Menu ROM
-        <span v-if="menu.ready()" style="color: green">✓</span>
-        <span v-if="!menu.ready()" style="color: red">✗</span>
-      </h2>
+      <h2>1. Add Game ROMs</h2>
       <section>
-        <div v-if="!menu.present()">
-          <p>Menu is not loaded. Please upload GB Memory Multi Menu (NP M-MENU) ROM.</p>
-        </div>
-        <div v-if="menu.present() && !menu.valid()">
-          <p>Menu is not valid. Please upload GB Memory Multi Menu (NP M-MENU) ROM.</p>
-        </div>
-        <div v-if="menu.loadedFromStorage && menu.valid()">
-          <p>Menu loaded from storage! You're all set.</p>
-        </div>
-        <div v-if="!menu.loadedFromStorage && menu.ready()">
-          <p>Menu loaded and cached! You're all set.</p>
-        </div>
-        <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
-          <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Upload Menu</label>
-        </button>
-        <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
-      </section>
-
-      <h2>
-        2. Add Game ROMs
-        <span v-if="roms.length > 0 && !romOverflow" style="color: green">✓</span>
-        <span v-if="romOverflow"style="color: red">✗</span>
-      </h2>
-      <section>
-        <table>
+        <table v-if="roms.length > 0" v-on:dragover="preventDefault" v-on:drop="dropFile">
           <thead>
             <tr>
-              <th></th>
+              <th>       
+                <button v-on:click="removeAllRoms" class="remove-all" :disabled="roms.length === 0" type="button" >
+                  <label>Remove All</label>
+                </button>
+              </th>
               <th>Title</th>
               <th>Mapper</th>
               <th>ROM</th>
@@ -65,13 +55,13 @@
             <tr v-for="(rom, index) in roms" v-bind:key="index">
               <td>
                 <button id="remove-rom" v-on:click="removeROM(index)" type="button">✗</button>
-                <button :disabled="index == 0" v-on:click="moveUp(index)" type="button">↑</button>
-                <button :disabled="index == (roms.length - 1)" v-on:click="moveDown(index)" type="button">↓</button>
+                <button :disabled="index === 0" v-on:click="moveUp(index)" type="button">↑</button>
+                <button :disabled="index === (roms.length - 1)" v-on:click="moveDown(index)" type="button">↓</button>
               </td>
               <td>{{ rom.title }}</td>
               <td>{{ rom.type }}</td>
               <td>{{ rom.romSizeKB() + 'k'}}</td>
-              <td>{{ rom.ramSizeKB() + 'k' }}</td>
+              <td>{{ rom.paddedRamSizeKB() + 'k' }}</td>
               <td>{{ rom.paddedRomSizeKB() / 128 + ' (' + rom.paddedRomSizeKB() + 'k)'}}</td>
               <td>
                 <input type="text" class='menu-text' :value="rom.menuText" @input="e => updateMenuText(rom, e.target.value)"/>
@@ -84,55 +74,100 @@
           <tfoot>
             <tr>
               <td>
-                <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.ready() || romOverflow" type="button">
-                  <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Game</label>
+                <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.present() || romOverflow" type="button">
+                  <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Games</label>
                 </button>
-                <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.ready() || romOverflow" accept=".gb,.gbc" multiple>
               </td>
-              <td></td>
               <td></td>
               <td>{{ processor.romTotalKB() + 'k' }}</td>
               <td>{{ processor.ramUsedKB() + 'k' }}</td>
-              <td :class="{ overflow: romOverflow }">
+              <td :class="overflowClassMsg.class">
                 {{ processor.romUsedKB() / 128 + ' (' + processor.romUsedKB() + 'k)'}}
               </td>
-              <td :class="{ overflow: romOverflow }">
-                <span v-if="romOverflow">Limit is 7 blocks</span>
+              <td :class="overflowClassMsg.class">
+                <span v-if="overflowClassMsg.msg">{{overflowClassMsg.msg}}</span>
               </td>
               <td></td>
             </tr>
           </tfoot>
         </table>
+
+        <div class="drag-target" v-if="roms.length === 0" v-on:dragover="preventDefault" v-on:drop="dropFile"
+          v-on:dragenter="$event.target.classList.add('over')" v-on:dragleave="$event.target.classList.remove('over')"
+        >
+          <div>Drag and drop one or more ROMs to get started!</div>
+          <div style="color: grey">- or -</div>
+          <div style="padding-left: 26px;">
+            <button v-on:click="triggerAddRomLabel" class="upload" :disabled="!menu.present() || romOverflow" type="button">
+              <label for="romFileInput" ref="addRomLabel" v-on:click="stopPropagation">Add Games</label>
+            </button>
+            <input style="display: none" id="romFileInput" type="file" v-on:change="addROM" :disabled="!menu.present() || romOverflow" accept=".gb,.gbc" multiple>
+
+            <button v-on:click="triggerAddMenuLabel" class="upload" type="button">
+              <label for="menuFileInput" ref="addMenuLabel" v-on:click="stopPropagation">Load GBNP ROM</label>
+            </button>
+            <input style="display: none" id="menuFileInput" type="file" v-on:change="addMenu" accept=".gb,.gbc">
+          </div>
+        </div>
       </section>
 
-      <h2>3. Tweak Settings </h2>
+      <h2>2. Tweak Settings </h2>
       <section>
+        <div class="settings-row">
+          <label class="settings-label" for='cart-type'>Cartridge Type: </label>
+          <select id='cart-type' v-model="cartType">
+            <option v-bind:value="0">Nintendo GB Memory Cart</option>
+            <option v-bind:value="1">insideGadgets Power Cart</option>
+          </select>
+        </div>
+
         <div class="settings-row">
           <span class="settings-label">Menu Font: </span>
 
           <input type="radio" id="font0" name="font" value="0" v-model="fontIndex">
-          <label for="font0" id="pixeltype" class="radio-label">Pixeltype</label>
+          <label for="font0" id="gameboy" class="radio-label" title="By Jimmy Campbell">Game Boy</label>
 
           <input type="radio" id="font1" name="font" value="1" v-model="fontIndex">
-          <label for="font1" id="gameboy" class="radio-label">Game Boy</label>
+          <label for="font1" id="pokemon" class="radio-label" title="By Jackster Productions">POKéMON</label>
 
           <input type="radio" id="font2" name="font" value="2" v-model="fontIndex">
-          <label for="font2" id="nokia" class="radio-label">Nokia</label>
+          <label for="font2" id="nokia" class="radio-label" title="By Zeh Fernando">Nokia</label>
 
           <input type="radio" id="font3" name="font" value="3" v-model="fontIndex">
-          <label for="font3" id="gamer" class="radio-label">Gamer</label>
+          <label for="font3" id="gbmem" class="radio-label" title="By Lesserkuma">NP GBメモリ</label>
+
+          <input type="radio" id="font4" name="font" value="4" v-model="fontIndex">
+          <label for="font4" id="twliraj1" class="radio-label" title="By Lesserkuma">TWL-IRAJ-1</label>
         </div>
 
         <div class="settings-row">
-          <label class="settings-label" id="disableCGB-label" for="disableCGB-input">Disable CGB Palette: </label>
-          <input id="disableCGB-input" type="checkbox" v-model:checked="disableCGB"/>
-          The Game Boy will load the menu (and all games) in DMG palette mode.
+          <span class="settings-label">Ticker Text: </span>
+
+          <div style='display: inline-block'>
+            <input type="radio" id="original-ticker" value="0" v-model="tickerType">
+            <label for="original-ticker" class="radio-label">Original Japanese Ticker</label>
+
+            <input type="radio" id="custom-ticker" value="1" v-model="tickerType">
+            <label for="custom-ticker" class="radio-label">Custom Ticker</label>
+
+            <ticker-settings :show="tickerType == 1" :processor="processor" :font-index="fontIndex" :fonts-loaded="fontsLoaded"></ticker-settings>
+          </div>
         </div>
 
         <div class="settings-row">
-          <label class="settings-label" id="forceDMG-label" for="forceDMG-input">Force DMG Menu/Music: </label>
-          <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
-          The more minimal DMG menu and music will be used. <a href="img/menu_comparison.png">Comparison here.</a>
+          <span class="settings-label">ROM Hacks: </span>
+          <div class="flex-row">
+            <div class="flex-item">
+              <input id="englishPatch-input" type="checkbox" v-model:checked="englishPatch"/>
+              <label for="englishPatch-input">Translate the menu into English.</label>
+              <a href="img/english_patch_comparison.png">?</a>
+            </div>
+            <div class="flex-item">
+              <input id="forceDMG-input" type="checkbox" v-model:checked="forceDMG"/>
+              <label for="forceDMG-input">Use the DMG menu and music on color systems.</label>
+              <a href="img/menu_comparison.png">?</a>
+            </div>
+          </div>
         </div>
 
         <div class="settings-row">
@@ -141,11 +176,19 @@
         </div>
       </section>
 
-      <h2>4. Download Files</h2>
+      <h2>3. Download Files</h2>
       <section>
-        <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download GB File</a>
-        /
-        <a class='download-link' :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File</a>
+        <a class='download-link' :download="filename + '.gb'" :href="downloadEnabled ? romData : null" type="application/octet-stream" v-on:click="downloadRomFile" :class="{ disabled: !downloadEnabled }">Download ROM File ({{filename}}.gb)</a>
+        <br>
+        <a class='download-link' v-if="mapEnabled" :download="filename + '.map'" :href="downloadEnabled ? mapData : null" type="application/octet-stream" v-on:click="downloadMapFile" :class="{ disabled: !downloadEnabled }">Download MAP File ({{filename}}.map)</a>
+        <p v-if="mapEnabled" class="map-note"><span>⤷</span><span>Note: If you are using <a href="https://github.com/lesserkuma/FlashGBX">FlashGBX</a>, you do not need the MAP file<span></p>
+
+        <div v-if="singleRomMapEnabled" class="single-rom-download">
+          <div>If you want to flash {{singleRomFilename}} without the menu, you can use this MAP file to configure the cart to work with your ROM.</div>
+          <a class='download-link' :download="singleRomFilename + '.map'" :href="singleRomMapData" type="application/octet-stream" v-on:click="downloadSingleRomMapFile">
+            Download Single Game MAP File ({{singleRomFilename}}.map)
+          </a>
+        </div>
       </section>
     </div>
 
@@ -155,6 +198,8 @@
       <a href="https://github.com/orangeglo/gbnp">view this project on github</a>
       -
       by orangeglo (orangeglo#6197 on Discord)
+      -
+      <a href="https://orangeglo.github.io/">more tools @ orangeglo.github.io</a>
     </footer>
 
     <script src="script/app.js"></script>
