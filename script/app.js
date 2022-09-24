@@ -151,6 +151,7 @@ let app = new Vue({
 
       e.target.value = '';
     },
+
     addROM: function(e, f) {
       const files = f || e.target.files;
       for (let i = 0; i < files.length; i++) {
@@ -242,4 +243,49 @@ let app = new Vue({
   }
 });
 
-document.fonts.ready.then(function() { app.fontsLoaded = true });
+Vue.component('bitmap-preview', {
+  props: ['data', 'rom', 'index'],
+  mounted: function() {
+    this.renderCanvas();
+    console.log(this.rom.title);
+  },
+  watch: {
+    data: function() {
+      this.renderCanvas();
+    }
+  },
+  methods: {
+    renderCanvas: function() {
+      const canvas = this.$refs.canvas;
+      const ctx = canvas.getContext('2d');
+      ctx.putImageData(new ImageData(this.data, 96, 8), 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.scale(2, 2);
+      ctx.drawImage(ctx.canvas, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    },
+    addImage: function(e) {
+      const rom = this.rom;
+      const imageReader = new FileReader();
+      imageReader.onload = function(e) {
+        const img = new Image();
+        img.addEventListener("load", function(e) {
+          rom.updateBitmap(null, e.target);
+        });
+        img.src = e.target.result;
+      };       
+      imageReader.readAsDataURL(e.target.files[0]);
+    },
+    triggerAddImageLabel: function () { this.$refs.addImageLabel.click(); },
+    stopPropagation: function(e) { app.stopPropagation(e); }
+  },
+  template: `
+    <div>
+      <canvas width="192" height="16" ref="canvas"></canvas>
+      <button v-on:click="triggerAddImageLabel" type="button">
+        <label :for="'imageFileInput-' + index" ref="addImageLabel" v-on:click="stopPropagation">Upload</label>
+      </button>
+      <input style="display: none" :id="'imageFileInput-' + index" type="file" v-on:change="addImage">
+    </div>`
+});
+
