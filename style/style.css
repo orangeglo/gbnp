@@ -1,27 +1,34 @@
 @font-face {
   font-family: "Gameboy";
-  src: url("./font/Gameboy.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Gamer";
-  src: url("./font/Gamer.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Pixeltype";
-  src: url("./font/Pixeltype.woff") format("woff");
+  src: url("../font/Gameboy.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Nokia";
-  src: url("./font/Nokia.woff") format("woff");
+  src: url("../font/Nokia.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "PokemonGB";
+  src: url("../font/Pokemon.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "DMG-MMSA";
+  src: url("../font/DMG-MMSA.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "TWL-IRAJ-1";
+  src: url("../font/TWL-IRAJ-1.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -45,19 +52,23 @@ h1, h2 {
 
 h2 {
   color: #444;
-  border-top: 2px dotted grey;
+  border-top: 1px solid grey;
   display: inline-block;
-  border-bottom: 2px dotted grey;
+  border-bottom: 1px solid grey;
 }
 
 p {
   margin-top: 0;
 }
 
+ul {
+  margin: 0;
+  padding-left: 10px;
+}
+
 footer {
   margin-top: 40px;
   font-size: 0.75em;
-  color: #444;
 }
 
 button {
@@ -79,12 +90,16 @@ button#remove-rom {
   color: red;
 }
 
+button.remove-all{
+  color: red;
+}
+
 button[disabled='disabled'] {
   color: grey;
 }
 
 .text-container {
-  width: 850px;
+  max-width: 850px;
   margin-bottom:25px;
 }
 
@@ -121,6 +136,10 @@ td.overflow {
   background-color: red;
 }
 
+td.single-rom {
+  background-color: orange;
+}
+
 thead tr {
   border-bottom: 1px solid #ddd;
 }
@@ -136,34 +155,18 @@ tbody tr:nth-child(odd) {
 .settings-label {
   font-weight: bold;
   margin-right: 20px;
-  min-width: 190px;
+  min-width: 160px;
   display: inline-block;
+  vertical-align: top;
 }
 
 .settings-row {
   margin-bottom: 15px;
 }
 
-.menu-hint {
-  font-size: 0.75em;
-  color: #444;
-}
-
-.tooltip {
-  cursor: help;
-}
-
 label.radio-label {
   vertical-align: middle;
   margin-right: 10px;
-}
-
-label#pixeltype {
-  font-family: 'Pixeltype';
-  font-size: 32px;
-  line-height: 0;
-  position: relative;
-  top: 3px;
 }
 
 label#gameboy {
@@ -174,15 +177,77 @@ label#nokia {
   font-family: 'Nokia';
 }
 
-label#gamer {
-  font-family: Gamer;
-  font-size: 32px;
-  line-height: 0;
+label#pokemon {
+  font-family: 'PokemonGB';
   position: relative;
-  top: -2px;
+  top: 3px;
+}
+
+label#gbmem {
+  font-family: 'DMG-MMSA';
+  text-transform: uppercase;
+}
+
+label#twliraj1 {
+  font-family: 'TWL-IRAJ-1';
 }
 
 noscript {
   font-weight: bold;
   color: red;
 }
+
+.drag-target {
+  height: 70px;
+  max-width: 945px;
+  padding: 20px;
+  border: 2px dashed grey;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  transition: 0.5s all;
+}
+
+.drag-target.over {
+  border-color: #000079;
+  transform: scale(1.02, 1.05);
+  cursor: grabbing;
+}
+
+.drag-target div {
+  transition: 0.5s all;
+}
+.drag-target.over div {
+  opacity: 0.5;
+}
+
+.flex-row {
+  display: inline-flex;
+}
+
+.flex-item {
+  max-width: 400px;
+  margin-right: 20px;
+}
+
+.games-flex-item {
+  min-width: 250px;
+  margin-right: 20px;
+}
+
+.single-rom-download {
+  margin-top: 1.5rem;
+}
+
+.hide {
+  display: none;
+}
+
+.ticker-settings {
+  margin-top: 0.4rem;
+}
+
+.map-note { margin-left: 0.5rem; }
+.map-note span:first-child { font-size: 1.2rem; margin-right: 0.3rem; }
+.map-note span:last-child { vertical-align: sub; }
