@@ -100,7 +100,7 @@ class ROM {
   valid() {
     if (!this._valid) {
       let check = Array.from(new Uint8Array(this.arrayBuffer.slice(260, 265)));
-      this._valid = (JSON.stringify(check) === JSON.stringify([0xCE,0xED,0x66, 0x66, 0xCC]));
+      this._valid = (JSON.stringify(check) === JSON.stringify([0xCE, 0xED, 0x66, 0x66, 0xCC]));
     }
 
     return this._valid;
