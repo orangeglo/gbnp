@@ -68,7 +68,8 @@ class ROM {
     this.code = `${cgbByte == 0xC0 ? 'CGB' : 'DMG'} -??? -  `; // default code
     if (typeof TITLE_TO_CODE === 'object' && TITLE_TO_CODE[this.title.replace(/ /g, '')]) {
       const code = TITLE_TO_CODE[this.title.replace(/ /g, '')];
-      this.code = `${code.slice(0, 3)} ${code.slice(3)} -  `.slice(0, 12);
+      const letters = code.slice(4).trim();
+      this.code = `${code.slice(0, 3)} -${letters}${letters.length === 3 ? ' ' : ''}-  `.slice(0, 12);
     }
 
     file.seek(0x147);
@@ -368,7 +369,7 @@ class Processor {
 
     // timestamp / writer id
     const date = (new Date).toISOString().split('.')[0].replace('T', '').replace(/-/g, '/');
-    const timestampId = `${date} ORANGE `; // should be 26 bytes
+    const timestampId = `${date}GBNP    `; // should be 26 bytes
     romFile.seek(0x1C1BF);
     romFile.writeBytes(stringToCharArray(timestampId));
 
@@ -412,10 +413,10 @@ class Processor {
       // game identifier "DMG -TRA -  "
       romFile.writeBytes(stringToCharArray(rom.code)); // 12 characters
 
-      // Shift-JIS title (override with ascii)
+      // title (normally shift-jis, not ascii)
       romFile.seek(romFileIndex + 19);
-      romFile.writeByteUntil(0, 0x1C23F) // override with zeros
-      romFile.seek(romFileIndex + 20); // leave first byte emtpy to identify as ascii text
+      romFile.writeByteUntil(0x20, romFileIndex + 19 + 44); // write spaces
+      romFile.seek(romFileIndex + 19);
       romFile.writeBytes(stringToCharArray(rom.title));
 
       // title bitmap
